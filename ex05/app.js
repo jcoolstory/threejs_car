@@ -18,43 +18,41 @@ var onProgress = function ( xhr) {
 
 var onError = function (xhr ) {
 };
-var texture = new THREE.TextureLoader().load( '../image/dice-texture.jpg' );
+var texture = new THREE.TextureLoader(manager).load( 'res/skin01/0000.BMP' );
 var loader = new THREE.OBJLoader(manager);
 loader.load('res/Porsche_911_GT2.obj', function (obj){
     obj.traverse ( function ( child ) { 
         if ( child instanceof THREE.Mesh) {
-           // child.material.color= 0xffffff;
-            //child.material
-           // console.log(child)
             child.material.map = texture;
         }
     });
 
-   // obj.position.y = -95;
-   // scene.add( obj );
-    console.log(obj)
+    obj.position.y = 0;
+    scene.add( obj );
 }, onProgress, onError);
 
-var geometry = new THREE.CubeGeometry( 1, 1, 1 );
-var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
-var cube = new THREE.Mesh( geometry, material );
+var ambientLight = new THREE.AmbientLight( 0xcccccc, 0.4 );
+scene.add( ambientLight );
+var pointLight = new THREE.PointLight( 0xffffff, 0.8 );
+camera.add( pointLight );
+scene.add( camera );
 
-scene.add(cube)
-
-function toRadian(degree) {
-    return degree * Math.PI / 180 
-}
 var controls = new THREE.OrbitControls( camera, renderer.domElement );
 camera.position.z = 10;
 var light = new THREE.AmbientLight( 0x404040 ); // soft white light
 scene.add( light );
 var labelRX = document.getElementById("rotateX"); 
 var labelRY = document.getElementById("rotateY");
+
+function toRadian(degree) {
+    return degree * Math.PI / 180 
+}
+
 function animate(time) {
     requestAnimationFrame( animate );
     
-    //labelRX.innerHTML = cube.rotation.x;
-    //labelRY.innerHTML = cube.rotation.y;
+    labelRX.innerHTML = camera.rotation;
+    labelRY.innerHTML = camera.rotation;
 	renderer.render( scene, camera );
 }
 function StopWatch(dur, start, to){
