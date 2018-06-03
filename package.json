@@ -4,11 +4,15 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "server" : "http-server"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "three": "^0.92.0"
+  },
+  "devDependencies": {
+    "http-server": "^0.11.1"
   }
 }
