@@ -23,17 +23,17 @@ var onProgress = function ( xhr) {
 var onError = function (xhr ) {
 };
 
-var texture = new THREE.TextureLoader(manager).load( 'res/skin00/0000.BMP' );
+var texture = new THREE.TextureLoader(manager).load( '../res/skin00/0000.BMP' );
 var loader = new THREE.OBJLoader(manager);
 var materialColor = new THREE.Color(1,1,1);
 var texturedMaterial =new THREE.MeshPhongMaterial( { color: materialColor, flatShading:false, side: THREE.DoubleSide } )
-//var texturedMaterial = new THREE.MeshPhongMaterial( { color: materialColor,wireframe: true , map: texture, side: THREE.DoubleSide } );
+//var texturedMaterial = new MeshLambertMaterial( { color: materialColor, flatShading:false, side: THREE.DoubleSide } )
 //var texturedMaterial = new THREE.MeshPhongMaterial( { color: materialColor,wireframe: true } );
 texturedMaterial.shininess = 40;
 texturedMaterial.specular = new THREE.Color(1,1,1);
 texturedMaterial.map = texture;
 
-loader.load('res/Porsche_911_GT2.obj', function (obj){
+loader.load('../res/Porsche_911_GT2.obj', function (obj){
     obj.traverse ( function ( child ) { 
         if ( child instanceof THREE.Mesh) {
             
@@ -42,7 +42,6 @@ loader.load('res/Porsche_911_GT2.obj', function (obj){
     });
 
     obj.position.y = 0;
-    obj.rotateX(1);
     scene.add( obj );
 }, onProgress, onError);
 
