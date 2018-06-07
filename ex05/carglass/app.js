@@ -1,5 +1,5 @@
 var scene = new THREE.Scene();
-var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 50 );
+var camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 500 );
 var doorleft = undefined,
     doorright = undefined;
 var ignoreList = ["part 003"]
@@ -9,7 +9,7 @@ var renderer = new THREE.WebGLRenderer();
 renderer.setSize( window.innerWidth, window.innerHeight );
 document.body.appendChild( renderer.domElement );
 var controls = new THREE.OrbitControls( camera, renderer.domElement );
-
+controls.maxPolarAngle = toRadian(80);
 camera.position.z = 10;
 
 var manager = new THREE.LoadingManager();
@@ -45,6 +45,7 @@ glassMaterial.shininess = 80;
 glassMaterial.specular = new THREE.Color(1,1,1);
 glassMaterial.opacity = 0.2;
 glassMaterial.transparent = true;
+
 texturedMaterial.shininess = 40;
 texturedMaterial.specular = new THREE.Color(1,1,1);
 texturedMaterial.map = texture;
@@ -69,12 +70,14 @@ loader.load('../res/Porsche_911_GT2.obj', function (obj){
             }
         }
     });
+
     scene.add( obj );
+    var box = new THREE.BoxHelper( obj, 0xffff00 );
+    box.geometry.computeBoundingBox();
+    obj.position.y = -box.geometry.boundingBox.min.y;
 }, onProgress, onError);
 
-var helper = new THREE.GridHelper( 1000, 100 );
-helper.position.y = - 0;
-helper.material.opacity = 0.25;
+var helper = new THREE.GridHelper( 500, 50 );
 helper.material.transparent = false;
 scene.add(helper);
 
@@ -82,27 +85,36 @@ var ambientLight = new THREE.AmbientLight( 0xcccccc, 0.4 );
 var pointLight = new THREE.PointLight( 0xffffff, 0.8 );
 var light = new THREE.AmbientLight( 0x404040 ); // soft white light
 
+var groundGeo = new THREE.PlaneBufferGeometry( 500, 500 );
+var groundMat = new THREE.MeshPhongMaterial( { color: 0xffffff, specular: 0x050505 } );
+groundMat.color.setHSL( 0.095, 1, 0.75 );
+var ground = new THREE.Mesh( groundGeo, groundMat );
+ground.rotation.x = -Math.PI/2;
+ground.position.y = 0;
+
+scene.add( ground );
+                
 camera.add( pointLight );
 scene.add( ambientLight );
 scene.add( camera );
 scene.add( light );
 scene.background = textureCube;
+
+renderer.shadowMap.enabled = true;
 var labelRX = document.getElementById("rotateX"); 
 var labelRY = document.getElementById("rotateY");
+
 function toRadian(degree) {
     return degree * Math.PI / 180 
 }
 
 function animate(time) {
     requestAnimationFrame( animate );
-    tierMesh.forEach(f=>{
-        //f.rotation += toRadian(1);
-        
-    })
     // labelRX.innerHTML = camera.rotation.x.toFixed(3);
     // labelRY.innerHTML = camera.rotation.y.toFixed(3);
 	renderer.render( scene, camera );
 }
+
 function StopWatch(dur, start, to){
     let startTime = +Date.now();
     var currentTime = 0;
