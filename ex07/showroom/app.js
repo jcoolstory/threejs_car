@@ -26,11 +26,13 @@ function init() {
     
     controls = new THREE.OrbitControls( camera, renderer.domElement );
     controls.maxPolarAngle = toRadian(80);
+    controls.maxDistance = 15;
     controls.autoRotate = true;
     controls.autoRotateSpeed = 1;
     document.addEventListener("mousemove", onMouseMove);
 
     document.addEventListener("click",onMouseClick);
+    window.addEventListener( 'resize', onWindowResize);
     labelRX = document.getElementById("rotateX"); 
     labelRY = document.getElementById("rotateY");
 
@@ -197,6 +199,13 @@ function toRadian(degree) {
     return degree * Math.PI / 180 
 }
 
+
+function onWindowResize() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize( window.innerWidth, window.innerHeight );
+    controls.handleResize();
+}
 
 function onMouseMove(event){
     mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
