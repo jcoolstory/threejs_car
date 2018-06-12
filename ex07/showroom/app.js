@@ -1,12 +1,9 @@
 var sacne , camera , renderer, labelRX, labelRY;
-var mainModel, bodyMaterial, raycaster, cursor , interiorMaterial, shadow;
-var radius = 5, theta = 0;
+var mainModel, bodyMaterial, raycaster, cursor , interiorMaterial, shadow , theta=0 
+var radius =15, theta = 0;
 var mouse = new THREE.Vector2(), INTERSECTED;
-var rightDoor = {name:"Mesh74_032Gruppe_12_1_032Group1_032Lamborghini_Aventador1_032Model",
-opened:false}
-;
-var leftDoor = {name:"Mesh204_032Gruppe_12_2_032Group1_032Lamborghini_Aventador1_032Model",
-opened:false};
+var rightDoor = {name:"Mesh74_032Gruppe_12_1_032Group1_032Lamborghini_Aventador1_032Model", opened:false};
+var leftDoor = {name:"Mesh204_032Gruppe_12_2_032Group1_032Lamborghini_Aventador1_032Model", opened:false};
 var doorModels = [rightDoor, leftDoor];
 
 init();
@@ -16,7 +13,6 @@ function init() {
     scene = new THREE.Scene();
     renderer = new THREE.WebGLRenderer({antialias:false});
     renderer.setSize( window.innerWidth, window.innerHeight );
-    //renderer. = true;
     document.body.appendChild( renderer.domElement );
     
     camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 0.1, 1000 );
@@ -37,13 +33,11 @@ function init() {
 
     scene.add( camera );
 
-
     createModels();
     createLight();
 
     raycaster = new THREE.Raycaster();
 }
-
 
 function createModels() {
 
@@ -57,7 +51,6 @@ function createModels() {
     textureCube = new THREE.CubeTextureLoader().load( urls );
 
     // MATERIALS
-    
     var onProgress = function ( xhr) {
         if ( xhr.lengthComputable) {
             var percentComplate = xhr.loaded / xhr.total * 100;
@@ -67,7 +60,6 @@ function createModels() {
 
     var onError = function (xhr ) {
     };    
-    var x = new THREE.MeshPhongMaterial();
     
     new THREE.MTLLoader()   
     .setPath( '../res/Aventador/' )
@@ -88,39 +80,26 @@ function createModels() {
                                 bodyMaterial.copy(child.material);
                                 bodyMaterial.side = THREE.DoubleSide;
                             }
-                            child.material =bodyMaterial;
-                            // child.visible = false;
-                        } else
-                        if (child.material.name == "Glass") {
-                            //child.material.color = new THREE.Color(1,1,1);
-                            child.visible = false;
-                        } else
-
-                        if (child.material.name == "interior"){
-                            if (interiorMaterial==undefined)
+                            child.material = bodyMaterial;
+                        } else if (child.material.name == "interior"){
+                            if (interiorMaterial == undefined)
                             {
                                 interiorMaterial = new THREE.MeshLambertMaterial({color:0x333333});
-                                // interiorMaterial.copy(child.material);
-                                // interiorMaterial.map= child.material.map;
                             }
                             child.material =interiorMaterial;
-                            // child.material.map = null;
-                            // child.material.color = new THREE.Color(1,1,1);
-                            // child.material.specular = new THREE.Color(1,1,1);
                         } else {
 
                         }
-
-                       
                     }
                 });
 
                 mainModel = object;                
                 scene.add( object );
                 shadow.visible = true;
-                var box = new THREE.BoxHelper( object, 0xffff00 );
-                box.geometry.computeBoundingBox();
-                console.log(mainModel.children);
+                // var box = new THREE.BoxHelper( object, 0xffff00 );
+                // scene.add(box);
+                // box.geometry.computeBoundingBox();
+                // console.log(mainModel.children);
                 var names = object.children.reduce((p,c)=>{
                     if (c.material.name in p) {
                         p[c.material.name].push(c.material);
@@ -146,19 +125,16 @@ function createModels() {
     scene.add(ground);
 
 
-    //var groundTexture =  new THREE.TextureLoader().load("../res/crocodile--skin-texture.jpg");
     var shadowTexture =  new THREE.TextureLoader().load("../res/car_shadow.png");
     var shadowGeometry = new THREE.PlaneBufferGeometry( 7, 4 );
-    var shadowMet = new THREE.MeshBasicMaterial( { color: 0xffffff } );
-    shadowMet.map = shadowTexture;
-    // groundMat.color.setHSL( 0.095, 0.095, 0.095 );
+    var shadowMet = new THREE.MeshBasicMaterial( { color: 0xffffff , map: shadowTexture} );
     shadow = new THREE.Mesh( shadowGeometry, shadowMet );
     shadow.rotation.x = -Math.PI/2;
     shadow.position.y = 0.01;
     shadow.visible = false;
     scene.add(shadow);
 
-    // // create dome
+    // create dome
     var domeMaterial = new THREE.MeshBasicMaterial( { color:0xffffff ,side: THREE.DoubleSide } );
     var dome = new THREE.Mesh( new THREE.SphereBufferGeometry( 20, 20, 10 ), domeMaterial );
     scene.add( dome );
@@ -275,8 +251,13 @@ function onMouseClick(event) {
 
 function animate(time) {
     requestAnimationFrame( animate );
-    // console.log(scene.children);
     raycaster.setFromCamera( mouse, camera );
+
+    // theta += 0.1;
+    // camera.position.x = radius * Math.sin( THREE.Math.degToRad( theta ) );
+    // // camera.position.y = radius * Math.sin( THREE.Math.degToRad( theta ) );
+    // camera.position.z = radius * Math.cos( THREE.Math.degToRad( theta ) );
+    // camera.lookAt( scene.position );
 
     if (mainModel) {
         var intersects = raycaster.intersectObjects( mainModel.children );
@@ -288,23 +269,6 @@ function animate(time) {
         } else {
             cursor.visible = false;
         }
-
-        // if (intersects.length > 0) {
-            
-        //     // if ( INTERSECTED != intersects[ 0 ].object ) {
-        //     //     if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-        //     //     INTERSECTED = intersects[ 0 ].object;
-        //     //     INTERSECTED.currentHex = INTERSECTED.material.emissive.getHex();
-        //     //     INTERSECTED.material.emissive.setHex( 0xff0000 );
-        //     // }
-        //     // else {
-        //     //     if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
-        //     //     INTERSECTED = null;
-        //     // }
-        //     console.log(INTERSECTED==intersects[ 0 ].object );
-        //     INTERSECTED = intersects[ 0 ].object 
-            
-        // }
     }
 
 	renderer.render( scene, camera );
