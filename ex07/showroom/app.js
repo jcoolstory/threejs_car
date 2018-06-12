@@ -1,5 +1,5 @@
 var sacne , camera , renderer, labelRX, labelRY;
-var mainModel, bodyMaterial, raycaster, cursor , interiorMaterial, shadow , theta=0 
+var mainModel, bodyMaterial, raycaster, cursor , interiorMaterial, shadow , theta=0 ,controls
 var radius =15, theta = 0;
 var mouse = new THREE.Vector2(), INTERSECTED;
 var rightDoor = {name:"Mesh74_032Gruppe_12_1_032Group1_032Lamborghini_Aventador1_032Model", opened:false};
@@ -16,17 +16,20 @@ function init() {
     document.body.appendChild( renderer.domElement );
     
     camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 0.1, 1000 );
-    camera.position.z = 7.3;
-    camera.position.y = 2.5;
-    camera.position.x = -7.313;
+    camera.position.z = 6;
+    camera.position.y = 2;
+    camera.position.x = -6;
 
     camera.rotation.x = -0.329;
     camera.rotation.y = -0.75;
     camera.rotation.z = -0.23;
     
-    var controls = new THREE.OrbitControls( camera, renderer.domElement );
+    controls = new THREE.OrbitControls( camera, renderer.domElement );
     controls.maxPolarAngle = toRadian(80);
+    controls.autoRotate = true;
+    controls.autoRotateSpeed = 1;
     document.addEventListener("mousemove", onMouseMove);
+
     document.addEventListener("click",onMouseClick);
     labelRX = document.getElementById("rotateX"); 
     labelRY = document.getElementById("rotateY");
@@ -76,9 +79,9 @@ function createModels() {
                         if ( child.material.name === "Body") {
                             if (bodyMaterial == undefined)
                             {
-                                bodyMaterial =  new THREE.MeshStandardMaterial( { color: child.material.color, roughness: 0, metalness: 0 } );
+                                bodyMaterial =  new THREE.MeshStandardMaterial( );
                                 bodyMaterial.copy(child.material);
-                                bodyMaterial.side = THREE.DoubleSide;
+                                
                             }
                             child.material = bodyMaterial;
                         } else if (child.material.name == "interior"){
@@ -147,30 +150,29 @@ function createModels() {
 
 function createLight(){
     
-    var ambientLight = new THREE.AmbientLight( 0xaaaaaa,0.3 );
-    var pointLight = new THREE.PointLight( 0xffffff, 0.3);
-    var directLight = new THREE.DirectionalLight(0xfffffff,0.7);
+    var ambientLight = new THREE.AmbientLight( 0x333333,0.3 );
+    var pointLight = new THREE.PointLight( 0xffffff, 1);
+    var directLight = new THREE.DirectionalLight(0xfffffff,1);
     directLight.position.x = 5;
-    directLight.position.y = 10;
-    directLight.position.z = 7.5;
+    directLight.position.y = 5;
+    directLight.position.z = 5;
     
-    pointLight.position.x = 5;
+    pointLight.position.x = -5;
     pointLight.position.y = 5;
-    pointLight.position.z = 5;
+    pointLight.position.z = -5;
+    scene.add(pointLight);
     scene.add(directLight);
-    // scene.add( pointLight ) ;
-    ambientLight.position.x = 5;
-    ambientLight.position.y = 5;
-    ambientLight.position.z = 5;
+    
     scene.add( ambientLight );
-    // var p = new THREE.PointLight( 0xffffff, 1);
-    // p.position.y = 0.5;
+    // var p = new THREE.DirectionalLightHelper( directLight);
+    // // p.position.y = 0.5;
     // scene.add(p);
+
     
     for (let i= 0 ; i < 1 ; i++)
     {
         let rectLight = new THREE.RectAreaLight( 0x333333, 0.5,20, 20 );
-        rectLight.intensity = 4;
+        rectLight.intensity = 2;
         rectLight.position.set( i*4, 6, 0 );
         rectLight.rotation.x = toRadian(90);
         scene.add( rectLight );
@@ -240,7 +242,7 @@ function onMouseClick(event) {
                 }
                 // console.log(INTERSECTED);
                 // 
-                console.log(INTERSECTED)
+                // console.log(intersects[ 0 ].point)
             }
         } else {
             // if ( INTERSECTED ) INTERSECTED.material.emissive.setHex( INTERSECTED.currentHex );
@@ -252,7 +254,7 @@ function onMouseClick(event) {
 function animate(time) {
     requestAnimationFrame( animate );
     raycaster.setFromCamera( mouse, camera );
-
+    controls.update();
     // theta += 0.1;
     // camera.position.x = radius * Math.sin( THREE.Math.degToRad( theta ) );
     // // camera.position.y = radius * Math.sin( THREE.Math.degToRad( theta ) );
