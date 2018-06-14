@@ -1,23 +1,9 @@
 var container, 
     renderer, 
     scene, 
-    camera, 
-    mesh, 
+    camera,  
     CursorX,
-    start = Date.now();
-
-function PostProcess() {
-
-    composer = new THREE.EffectComposer( renderer );
-    composer.addPass( new THREE.RenderPass( scene, camera ) );
-
-    
-    var GlowEffect = new THREE.ShaderPass( THREE.TestShader );
-    GlowEffect.uniforms[ 'Intensity' ].value = 0.01;
-    GlowEffect.uniforms[ 'Spread' ].value = 10.0;
-    // GlowEffect.renderToScreen = true;
-    composer.addPass( GlowEffect );
-}
+    CursorY;
 
 // GO
 window.addEventListener( 'load', function() {
@@ -29,19 +15,14 @@ window.addEventListener( 'load', function() {
     scene = new THREE.Scene();
 
     // Add fog
-    // scene.fog = new THREE.Fog( "#000000" , 0, 800)
+    scene.fog = new THREE.Fog( "#000000" , 0, 800)
 
     Aspect = 1.778;
     ViewportWidth = 1280;
     
     // create a camera the size of the browser window
     // and place it 100 units away, looking towards the center of the scene
-    camera = new THREE.PerspectiveCamera( 
-        25.0, 
-        Aspect, 
-        1, 
-        10000 );
-        
+    camera = new THREE.PerspectiveCamera( 75.0, Aspect, 1, 10000 );
         
     Camera_Parent = new THREE.Object3D();
     Camera_Parent.add( camera );
@@ -52,7 +33,7 @@ window.addEventListener( 'load', function() {
     var InitCamX = 180;
     var InitCamY = 20;
     var InitCamZ = 250;
-    camera.position.set(InitCamX ,0, InitCamZ);
+    camera.position.set(InitCamX , 0, InitCamZ);
 
     
     // Init before Orbitcontrols, set orbit as the same
@@ -62,11 +43,10 @@ window.addEventListener( 'load', function() {
 
     
     // Controls
-    
     OrbitControls = new THREE.OrbitControls( camera );
     OrbitControls.target = CameraTarget;
     
-    camera.position.set(InitCamX,InitCamY,InitCamZ);
+    camera.position.set(InitCamX, InitCamY, InitCamZ);
     
     // Stop from going inside the geometry
     OrbitControls.minDistance = 150;
@@ -76,17 +56,8 @@ window.addEventListener( 'load', function() {
     OrbitControls.minPolarAngle = 0; // radians
     OrbitControls.maxPolarAngle = 1.65;
     
-    if (FreeCam == 0) {
-
-        // Disable zoom and pan
-        OrbitControls.noZoom = true;
-        OrbitControls.noPan = true;
-    }
-    
-    
     // Build cube map (animate later)
     var path = "./CubeMap_Seq/CubeMap_";
-
     var CubeMapFrame = "_0001";
     var format = '.jpg';
     var urls = [
@@ -101,7 +72,6 @@ window.addEventListener( 'load', function() {
 
     reflectionCube = THREE.ImageUtils.loadTextureCube( urls );
 
-    
     // Build cube map (animate later)
     var path = "./CubeMap_Seq/CubeMap_";
 
@@ -121,7 +91,6 @@ window.addEventListener( 'load', function() {
     
     
     // DB5 Textures
-    
     var DB5MapPath = "./textures/";
     
     T_DB5_Diffuse = THREE.ImageUtils.loadTexture(DB5MapPath + "DB5_Body_Diffuse.jpg" );
@@ -136,217 +105,201 @@ window.addEventListener( 'load', function() {
     T_DB5_Chrome_Reflection = THREE.ImageUtils.loadTexture(DB5MapPath + "DB5_Chrome_Reflection.jpg" );
     
     
-
-    
-    if (HighQuality == "1") {
-        IfGlossyEnabled = true;
-    }
-    else {
-        IfGlossyEnabled = false;
-    }
-    
-    console.log("HighQuality: " + HighQuality);
+    IfGlossyEnabled = false;
     
     MT_Chrome = SRMaterial({ 
-                            ReflLayer_Glossy: false,
-                            ReflLayer_Coat: true,
-                            
-                            Diffuse : T_DB5_Chrome_Diffuse,
-                            EnvMap : ReflectionCubeLow,
-                            
-                            Specular : new THREE.Color(1,1,1),
-                            
-                            ReflectAmount : 2,
-                            Glossiness: .1,
-                            // GlossinessColor : new THREE.Color(.9,.5,.9),
-                            ReflectionMap: T_DB5_Chrome_Reflection,
-                            
-                            Ambient: .1,
-                            Falloff: .2,
-                            Opacity: 1,
-                            });
+        ReflLayer_Glossy: false,
+        ReflLayer_Coat: true,
+        
+        Diffuse : T_DB5_Chrome_Diffuse,
+        EnvMap : ReflectionCubeLow,
+        
+        Specular : new THREE.Color(1,1,1),
+        
+        ReflectAmount : 2,
+        Glossiness: .1,
+        // GlossinessColor : new THREE.Color(.9,.5,.9),
+        ReflectionMap: T_DB5_Chrome_Reflection,
+        
+        Ambient: .1,
+        Falloff: .2,
+        Opacity: 1,
+    });
                             
     MT_Rim = SRMaterial({ 
-                            ReflLayer_Glossy: false,
-                            ReflLayer_Coat: true,
-                            
-                            Diffuse : T_DB5_Rim_Diffuse,
-                            EnvMap : ReflectionCubeLow,
-                            
-                            Specular : new THREE.Color(1,1,1),
-                            
-                            ReflectAmount : 2,
-                            Glossiness: .1,
-                            GlossinessColor : new THREE.Color(.9,.5,.9),
-                            Ambient: .00,
-                            Falloff: .5,
-                            Opacity: 1,
-                            });
+        ReflLayer_Glossy: false,
+        ReflLayer_Coat: true,
+        
+        Diffuse : T_DB5_Rim_Diffuse,
+        EnvMap : ReflectionCubeLow,
+        
+        Specular : new THREE.Color(1,1,1),
+        
+        ReflectAmount : 2,
+        Glossiness: .1,
+        GlossinessColor : new THREE.Color(.9,.5,.9),
+        Ambient: .00,
+        Falloff: .5,
+        Opacity: 1,
+    });
                             
     MT_Glass = SRMaterial({ 
-                            ReflLayer_Glossy: false,
-                            ReflLayer_Coat: true,
-                            
-                            Diffuse : new THREE.Color(.1,.1,.1),
-                            EnvMap : reflectionCube,
+        ReflLayer_Glossy: false,
+        ReflLayer_Coat: true,
+        
+        Diffuse : new THREE.Color(.1,.1,.1),
+        EnvMap : reflectionCube,
 
-                            ReflectAmount : .9,
-                            Ambient: .0,
-                            Falloff: .9,
-                            Opacity: .01,
-                            
-                            });
+        ReflectAmount : .9,
+        Ambient: .0,
+        Falloff: .9,
+        Opacity: .01,
+        
+    });
                             
                             
     MT_GlassRed = SRMaterial({ 
-                            ReflLayer_Glossy: false,
-                            ReflLayer_Coat: true,
-                            
-                            Diffuse : new THREE.Color(.9,.1,.1),
-                            EnvMap : reflectionCube,
-                            
-                            Specular : new THREE.Color(1,1,1),
-                            
-                            ReflectAmount : 1,
+        ReflLayer_Glossy: false,
+        ReflLayer_Coat: true,
+        
+        Diffuse : new THREE.Color(.9,.1,.1),
+        EnvMap : reflectionCube,
+        
+        Specular : new THREE.Color(1,1,1),
+        
+        ReflectAmount : 1,
 
-                            Ambient:  new THREE.Color(.15,.02,.02),
-                            Falloff: .9,
-                            Opacity: 1,
-                            });
+        Ambient:  new THREE.Color(.15,.02,.02),
+        Falloff: .9,
+        Opacity: 1,
+    });
                             
                             
     MT_Windows = SRMaterial({ 
-                            ReflLayer_Glossy: false,
-                            ReflLayer_Coat: true,
-                            
-                            Diffuse : new THREE.Color(.1,.1,.1),
-                            EnvMap : reflectionCube,
-                            
-                            Specular : new THREE.Color(1,1,1),
-                            
-                            ReflectAmount : .8,
-                            Glossiness: .1,
-                            GlossinessColor : new THREE.Color(.9,.5,.9),
-                            Ambient: .0,
-                            Falloff: .9,
-                            Opacity: .8,
-                            });
+        ReflLayer_Glossy: false,
+        ReflLayer_Coat: true,
+        
+        Diffuse : new THREE.Color(.1,.1,.1),
+        EnvMap : reflectionCube,
+        
+        Specular : new THREE.Color(1,1,1),
+        
+        ReflectAmount : .8,
+        Glossiness: .1,
+        GlossinessColor : new THREE.Color(.9,.5,.9),
+        Ambient: .0,
+        Falloff: .9,
+        Opacity: .8,
+    });
                             
     MT_Steel = SRMaterial({ 
-                            ReflLayer_Glossy: IfGlossyEnabled,
-                            ReflLayer_Coat: true,
-                            Diffuse : new THREE.Color(.2,.2,.2),
-                            EnvMap : reflectionCube,
-                            Specular : new THREE.Color(1,1,1),
-                            ReflectAmount : 1,
-                            Glossiness: .2,
-                            GlossinessColor : new THREE.Color(1,1,1),
-                            Ambient: .0,
-                            Falloff: 1,
-                            Opacity: 1,
-                            });
+        ReflLayer_Glossy: IfGlossyEnabled,
+        ReflLayer_Coat: true,
+        Diffuse : new THREE.Color(.2,.2,.2),
+        EnvMap : reflectionCube,
+        Specular : new THREE.Color(1,1,1),
+        ReflectAmount : 1,
+        Glossiness: .2,
+        GlossinessColor : new THREE.Color(1,1,1),
+        Ambient: .0,
+        Falloff: 1,
+        Opacity: 1,
+    });
                             
     MT_Matt = SRMaterial({ 
-                            ReflLayer_Glossy: IfGlossyEnabled,
-                            ReflLayer_Coat: false,
-                            Diffuse : new THREE.Color(.2,.2,.2),
-                            EnvMap : reflectionCube,
-                            Specular : new THREE.Color(1,1,1),
-                            ReflectAmount : 1,
-                            Glossiness: .2,
-                            GlossinessColor : new THREE.Color(1,1,1),
-                            Ambient: .0,
-                            Falloff: 1,
-                            Opacity: 1,
-                            });
+        ReflLayer_Glossy: IfGlossyEnabled,
+        ReflLayer_Coat: false,
+        Diffuse : new THREE.Color(.2,.2,.2),
+        EnvMap : reflectionCube,
+        Specular : new THREE.Color(1,1,1),
+        ReflectAmount : 1,
+        Glossiness: .2,
+        GlossinessColor : new THREE.Color(1,1,1),
+        Ambient: .0,
+        Falloff: 1,
+        Opacity: 1,
+    });
                             
     MT_Interior = SRMaterial({ 
-                            ReflLayer_Glossy: false,
-                            ReflLayer_Coat: false,
-                            Diffuse : T_DB5_Interior_Diffuse,
-                            EnvMap : reflectionCube,
-                            Specular : new THREE.Color(1,1,1),
-                            ReflectAmount : 1,
-                            Glossiness: .2,
-                            GlossinessColor : new THREE.Color(1,1,1),
-                            Ambient: .5,
-                            Falloff: 1,
-                            Opacity: 1,
-                            });
+        ReflLayer_Glossy: false,
+        ReflLayer_Coat: false,
+        Diffuse : T_DB5_Interior_Diffuse,
+        EnvMap : reflectionCube,
+        Specular : new THREE.Color(1,1,1),
+        ReflectAmount : 1,
+        Glossiness: .2,
+        GlossinessColor : new THREE.Color(1,1,1),
+        Ambient: .5,
+        Falloff: 1,
+        Opacity: 1,
+    });
     
     // Make a SR material
-                
-    if (HighQuality == "1") {
-        MT_BodyAmbient = .9
-        MT_TyresAmb = .5
-    }
-    else{
-        MT_BodyAmbient = 1
-        MT_TyresAmb = .3
-    }
+    MT_BodyAmbient = 1
+    MT_TyresAmb = .3
     
     MT_Body = SRMaterial({ 
-                            ReflLayer_Glossy: IfGlossyEnabled,
-                            ReflLayer_Coat: true,
-                            Diffuse :  T_DB5_Diffuse,
-                            // Diffuse : new THREE.Color(.0,.0,.0),
-                            EnvMap : reflectionCube,
-                            EnvMapGlossy : ReflectionCubeLow,
-                            
-                            Specular : new THREE.Color(0,0,0),
-                            
-                            ReflectAmount : .9,
-                            // Map for reflection/spec
-                            ReflectionMap: T_DB5_Reflection,
-                            
-                            Glossiness: .01,
-                            // replaces glossiness
-                            GlossinessMap: T_DB5_Glossiness,
-                            
-                            
-                            // glossy color (VRay esq)
-                            // GlossinessColor : T_P911_GlossyColor,
-                            GlossinessColor : new THREE.Color(1.0, 1.0, 1.0),
+        ReflLayer_Glossy: IfGlossyEnabled,
+        ReflLayer_Coat: true,
+        Diffuse :  T_DB5_Diffuse,
+        // Diffuse : new THREE.Color(.0,.0,.0),
+        EnvMap : reflectionCube,
+        EnvMapGlossy : ReflectionCubeLow,
+        
+        Specular : new THREE.Color(0,0,0),
+        
+        ReflectAmount : .9,
+        // Map for reflection/spec
+        ReflectionMap: T_DB5_Reflection,
+        
+        Glossiness: .01,
+        // replaces glossiness
+        GlossinessMap: T_DB5_Glossiness,
+        
+        
+        // glossy color (VRay esq)
+        // GlossinessColor : T_P911_GlossyColor,
+        GlossinessColor : new THREE.Color(1.0, 1.0, 1.0),
 
-                            Ambient: MT_BodyAmbient,
-                            Falloff: .9,
-                            Opacity: 1,
+        Ambient: MT_BodyAmbient,
+        Falloff: .9,
+        Opacity: 1,
     });
 
     
         
     MT_BlackGlossy = SRMaterial({ 
-                            ReflLayer_Glossy: false,
-                            ReflLayer_Coat: true,
-                            Diffuse : new THREE.Color(0,0,0),
-                            EnvMap : reflectionCube,
-                            
-                            Specular : new THREE.Color(0,0,0),
-                            
-                            ReflectAmount : .5,
-                            Glossiness: .8,
-                            GlossinessColor : new THREE.Color(1,1,1),
-                            Ambient: 0,
-                            Falloff: 1.,
-                            Opacity: 1,
+        ReflLayer_Glossy: false,
+        ReflLayer_Coat: true,
+        Diffuse : new THREE.Color(0,0,0),
+        EnvMap : reflectionCube,
+        
+        Specular : new THREE.Color(0,0,0),
+        
+        ReflectAmount : .5,
+        Glossiness: .8,
+        GlossinessColor : new THREE.Color(1,1,1),
+        Ambient: 0,
+        Falloff: 1.,
+        Opacity: 1,
     });
                             
                             
     MT_Tyre = SRMaterial({ 
-                            ReflLayer_Glossy: false,
-                            ReflLayer_Coat: false,
-                            Diffuse : T_DB5_Tyre_Diffuse,
-                            EnvMap : reflectionCube,
-                            EnvMapGlossy : ReflectionCubeLow,
-                            Specular : new THREE.Color(0,0,0),
-                            
-                            ReflectAmount : .5,
-                            Glossiness: .2,
-                            GlossinessColor : new THREE.Color(.2,.2,.2),
-                            GlossinessMap: T_DB5_Tyre_Diffuse,
-                            Ambient: .4,
-                            Falloff: .5,
-                            Opacity: 1,
+        ReflLayer_Glossy: false,
+        ReflLayer_Coat: false,
+        Diffuse : T_DB5_Tyre_Diffuse,
+        EnvMap : reflectionCube,
+        EnvMapGlossy : ReflectionCubeLow,
+        Specular : new THREE.Color(0,0,0),
+        
+        ReflectAmount : .5,
+        Glossiness: .2,
+        GlossinessColor : new THREE.Color(.2,.2,.2),
+        GlossinessMap: T_DB5_Tyre_Diffuse,
+        Ambient: .4,
+        Falloff: .5,
+        Opacity: 1,
                             
     });
 
@@ -357,11 +310,11 @@ window.addEventListener( 'load', function() {
 
 
     MT_Set = new THREE.MeshPhongMaterial({ 
-                                            color: 0xdddddd,
-                                            ambient: new THREE.Color(1,1,1) ,
-                                            shininess: 0,
-                                            map: T_SetBaked,
-                                            // lightMap: T_FloorShadow,
+        color: 0xdddddd,
+        ambient: new THREE.Color(1,1,1) ,
+        shininess: 0,
+        map: T_SetBaked,
+        // lightMap: T_FloorShadow,
     }) ;
     
                                             
@@ -553,7 +506,7 @@ window.addEventListener( 'load', function() {
     
     
     var Ambient = 1;
-    var Light_Amb = new THREE.AmbientLight( new THREE.Color(Ambient,Ambient,Ambient) );
+    var Light_Amb = new THREE.AmbientLight( new THREE.Color(Ambient, Ambient, Ambient) );
     scene.add( Light_Amb );
     
         
@@ -593,25 +546,13 @@ function onWindowResize() {
     camera.aspect = ViewportWidth / ViewportHeight;
     camera.updateProjectionMatrix();
     renderer.setSize( ViewportWidth, ViewportHeight );
-
 }
-
-    
 
 
 function render() {
-    
-
     renderer.render( scene, camera );
     Time = requestAnimationFrame( render );
-    
-    // Enable to enable rift
-    // effect.render( scene, camera );
-    
-    
-    if (RotateCam == 1){
+
+    if (RotateCam == 1)
         Camera_Parent.rotation.y = (Time*.003);
-    }
-
-
 }

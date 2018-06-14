@@ -1,9 +1,6 @@
 // Overwriting some parts
 SR_UniformsLib = {
-
-
 	common: {
-
 		"diffuse" : { type: "c", value: new THREE.Color( 0x0000ff ) },
 		"opacity" : { type: "f", value: 1.0 },
 
@@ -54,33 +51,26 @@ SR_UniformsLib = {
 
         // Controls for glossyness creation
         "GlossyCalc_Rotation" : { type: "f", value: 0.2 },
-
 	},
 
 	bump: {
-
 		"bumpMap" : { type: "t", value: null },
 		"bumpScale" : { type: "f", value: 1 }
-
 	},
 
 	normalmap: {
-
 		"normalMap" : { type: "t", value: null },
 		"normalScale" : { type: "v2", value: new THREE.Vector2( 1, 1 ) }
 	},
 
 	fog : {
-
 		"fogDensity" : { type: "f", value: 0.00025 },
 		"fogNear" : { type: "f", value: 1 },
 		"fogFar" : { type: "f", value: 2000 },
 		"fogColor" : { type: "c", value: new THREE.Color( 0xffffff ) }
-
 	},
 
 	lights: {
-
 		"ambientLightColor" : { type: "fv", value: [] },
 
 		"directionalLightDirection" : { type: "fv", value: [] },
@@ -100,11 +90,9 @@ SR_UniformsLib = {
 		"spotLightDistance" : { type: "fv1", value: [] },
 		"spotLightAngleCos" : { type: "fv1", value: [] },
 		"spotLightExponent" : { type: "fv1", value: [] }
-
 	},
 
 	particle: {
-
 		"psColor" : { type: "c", value: new THREE.Color( 0xeeeeee ) },
 		"opacity" : { type: "f", value: 1.0 },
 		"size" : { type: "f", value: 1.0 },
@@ -115,11 +103,9 @@ SR_UniformsLib = {
 		"fogNear" : { type: "f", value: 1 },
 		"fogFar" : { type: "f", value: 2000 },
 		"fogColor" : { type: "c", value: new THREE.Color( 0xffffff ) }
-
 	},
 
 	shadowmap: {
-
 		"shadowMap": { type: "tv", value: [] },
 		"shadowMapSize": { type: "v2v", value: [] },
 
@@ -127,7 +113,6 @@ SR_UniformsLib = {
 		"shadowDarkness": { type: "fv1", value: [] },
 
 		"shadowMatrix" : { type: "m4v", value: [] }
-
 	}
 
 };
@@ -224,9 +209,7 @@ SR_ShaderLib = {
             // user control falloff
             "uniform float Falloff;",
             
-            
 
-        
             "uniform sampler2D ReflectionMap;",
             "uniform int ReflectionMap_InUse;",
             
@@ -281,7 +264,6 @@ SR_ShaderLib = {
 
             // QUARTION STUFF
             // http://www.geeks3d.com/20141201/how-to-rotate-a-vertex-by-a-quaternion-in-glsl/
-            
             "vec4 quat_from_axis_angle(vec3 axis, float angle){",
             "  vec4 qr;",
             "  float half_angle = (angle * 0.5) * 3.14159 / 180.0;",
@@ -312,14 +294,6 @@ SR_ShaderLib = {
                 // sr
                 "float sr_falloff = mix(1.0, 1.0 -( dot( CameraNormal, Normal )), Falloff ) ;",
                 
-                /*
-                "vec3 sr_falloffRGB = vec3( mix(1.0, 1.0 -( dot( CameraNormal, Normal              )), Falloff ), ",
-                                           "mix(1.0, 1.0 -( dot( CameraNormal * vec3(1.0,0.95,1.0), Normal  ) ), Falloff ), ",
-                                           "mix(1.0, 1.0 -( dot( CameraNormal * vec3(1.0,1.0,0.95), Normal ) ), Falloff ));",
-            
-                */
-                THREE.ShaderChunk[ "/Projects/0038_RealDrive/web/js_sr/GLSLnoisetest4.frag" ],
-                
                 THREE.ShaderChunk[ "logdepthbuf_fragment" ],
                 THREE.ShaderChunk[ "map_fragment" ],
                 THREE.ShaderChunk[ "alphamap_fragment" ],
@@ -330,9 +304,6 @@ SR_ShaderLib = {
 
                 THREE.ShaderChunk[ "lightmap_fragment" ],
                 THREE.ShaderChunk[ "color_fragment" ],
-                
-                // sr replacing this with code
-                /* THREE.ShaderChunk[ "envmap_fragment" ],*/
 
                 
                 // calculates the reflection vectors/angles, to retrieve correct part of image from cubemap
@@ -362,9 +333,6 @@ SR_ShaderLib = {
                 
                 // For a glossy object, sample the cubemap with reflectedRay with some noise applied
                 "if (ReflLayer_Glossy == 1) {",
-
-                    // Reset to black?
-                    // "shadingColor = vec4(0.5);",
                     
                     // If a glossiness map was given use it
                     "if (glossinessMap_InUse == 1){;",
@@ -695,6 +663,14 @@ function SRMaterial(Params) {
         lights: true,
         fog: true
     });
+
+    // var material = new THREE.ShaderMaterial ({
+    //     uniforms: THREE.ShaderLib['phong'].uniforms,
+    //     vertexShader: THREE.ShaderLib['phong'].vertexShader,
+    //     fragmentShader: THREE.ShaderLib['phong'].fragmentShader,
+    //     lights: true,
+    //     fog: true
+    // });
     
     material.envMap = true;
     material.map = Diffuse_MapInUse;
