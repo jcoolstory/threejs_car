@@ -1,0 +1,114 @@
+<html>
+<head>
+    <title>DB5 WebGL - Simon Reeves</title>
+    <!-- link to stylesheet -->
+    <style>
+    body {
+        background-color: #000000;
+        font-family: verdana;
+        font-size: .7em;
+        margin:0;
+    }
+
+    a{   color: red;
+        text-decoration: none;}
+    a:hover{
+    color:#fff;
+    }
+
+    div#container {
+        /* background-color:#232323; */
+        /* background-color:#000; */
+        /* width: 80%; */ 
+        /* margin: 2em auto; */
+        /* border-radius: 2px; */
+    }
+
+    div#LoadingBG {
+        background-color: #000000;
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        margin-left: auto;
+        margin-right: auto;
+        left: 0;
+        right: 0;
+        top: 0;
+        font-size:3em;
+        text-align: center;
+        vertical-align: middle;
+    }
+
+
+    div#LoadingProgressContainer div#LoadingProgress {
+        border-radius:2px;
+    }
+
+    div#LoadingProgress {
+        background-color: rgba(132, 21, 16, 1);
+        width: 0%;
+        height: 100%;
+    }
+
+    div#LoadingProgressContainer {
+        width: 50%;
+        height: 1em;
+        margin: 1em auto;
+        background-color: rgb(84, 84, 84);
+        border-radius: 2px;
+    }
+
+    #LoadingImage {
+        width: 50%;
+    }
+
+    div#info {
+    position: absolute;
+    color: rgb(255, 254, 240);
+    bottom: 1em;
+    right: 1em;
+    padding: 1em;
+    background-color: rgba(126, 126, 126, 0.36);
+    border-radius: 3px;
+    }
+    </style>
+    
+    <!-- Set some data for mobile -->
+    <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+
+    <script src="https://code.jquery.com/jquery-1.10.2.js"></script>
+    <script>
+        HighQuality = 0; //Don't forget the extra semicolon!
+        FreeCam = 1; //Don't forget the extra semicolon!
+        RotateCam = 1; //Don't forget the extra semicolon!
+        
+    </script>
+</head>
+        
+        
+    <body>
+        <div id="container"></div>
+        
+        <div id="LoadingBG">
+            <img id="LoadingImage" src="./img/DB5_WebGL_Rear_Preview.jpg">
+            <div id="LoadingProgressContainer">
+                <div id="LoadingProgress">
+                </div>
+            </div>
+        </div>
+    </body>
+
+
+    <script type="text/javascript" src="./js/three.min.js"></script>
+    <script type="text/javascript" src="./js/controls/OrbitControls.js"></script>
+    <script type="text/javascript" src="./js/loaders/OBJLoader.js"></script>
+
+    <!-- <script type="text/javascript" src="../../js/three.js"></script>
+    <script type="text/javascript" src="../../js/OrbitControls.js"></script>
+    <script type="text/javascript" src="../../js/exjs/loaders/OBJLoader.js"></script> -->
+    
+    <script src="./js_sr/SRShader.js"></script>   
+    
+    <script type="text/javascript" src="./app.js"></script>
+
+</html>
