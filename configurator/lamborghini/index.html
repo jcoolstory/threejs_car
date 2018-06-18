@@ -20,7 +20,7 @@
 		<script src="../../js/exjs/loaders/MTLLoader.js"></script>
 		<script src="../../js/exjs/lights/RectAreaLightUniformsLib.js"></script>
 		<div id="wrap"  >
-		<div class="progress" id="progressbar">
+		<div class="progress" id="progressbar" v-if="!load">
 			<h1> Loading... </h1>
 			<h4 v-cloak>{{ progressText }} %</h4>
 		</div>

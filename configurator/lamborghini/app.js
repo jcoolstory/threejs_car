@@ -55,11 +55,12 @@ function init() {
     raycaster = new THREE.Raycaster();
 }
 
-
-
-
 function createModels() {
     manager = new THREE.LoadingManager();
+    manager.onLoad = ( f => { loading = false } );
+    manager.onLoad= (f=> {
+        loading = false;
+    })
     var path = "../../res/textures/cube/skybox2/";
 				var urls = [
 					path + "px.jpg", path + "nx.jpg",
@@ -89,6 +90,7 @@ function createModels() {
                             {
                                 bodyMaterial =  new THREE.MeshStandardMaterial( );
                                 bodyMaterial.copy(child.material);
+                                vueApp.bodyColor = "#" + bodyMaterial.color.getHexString();
                                 
                             }
                             child.material = bodyMaterial;
@@ -144,19 +146,19 @@ function createModels() {
 function createLight(){
     
     var ambientLight = new THREE.AmbientLight( 0x333333,0.3 );
-    var pointLight = new THREE.PointLight( 0xffffff, 1);
     var directLight = new THREE.DirectionalLight(0xfffffff,1);
     directLight.position.x = 5;
     directLight.position.y = 5;
     directLight.position.z = 5;
-    
+   
+    var pointLight = new THREE.PointLight( 0xffffff, 0.3);
     pointLight.position.x = -5;
     pointLight.position.y = 5;
     pointLight.position.z = -5;
-    scene.add(pointLight);
-    scene.add(directLight);
+    camera.add(directLight);
     
     scene.add( ambientLight );
+
     var rectLight = new THREE.RectAreaLight( 0x333333, 0.5,20, 20 );
     rectLight.intensity = 2;
     rectLight.position.set( 4, 6, 0 );
@@ -225,7 +227,7 @@ function animate(time) {
         controls.update();
     }
     
-	    renderer.render( scene, camera );
+    renderer.render( scene, camera );
 }
 
 function StopWatch(dur, start, to){
@@ -292,7 +294,7 @@ var vueApp = new vue({
     data: function() {
         return {
             load : false,
-            bodyColor : "",
+            bodyColor : 0x4b0300,
             statusView : "Inner View",
             statusRotate : "Stop",
             progressValue : 0
@@ -326,8 +328,7 @@ var vueApp = new vue({
         },
     
         toggleRotate(){    
-            if (controls.enable)
-                controls.autoRotate = !controls.autoRotate;
+            controls.autoRotate = !controls.autoRotate;
             this.statusRotate =  controls.autoRotate ?   "Stop" : "Rotate";
         },
     
