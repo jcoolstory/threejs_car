@@ -1,4 +1,6 @@
-var sacne , camera , renderer, labelRX, labelRY , offsetX ,offsetY;
+
+
+var scene , camera , renderer, labelRX, labelRY , offsetX ,offsetY;
 var mainModel, bodyMaterial, raycaster, cursor , interiorMaterial, shadow , theta=0 ,controls
 var radius =15, theta = 0 , enableInner = false , press = false , loading = true , manager;
 var animations = [];
@@ -32,6 +34,7 @@ function init() {
 
     controls = new THREE.OrbitControls( camera, renderer.domElement );
     controls.maxPolarAngle = toRadian(80);
+    controls.maxDistance = 15;
     controls.autoRotate = true;
     controls.autoRotateSpeed = 1;
 
@@ -69,7 +72,7 @@ function createModels() {
 					path + "pz.jpg", path + "nz.jpg"
 				];
 
-    textureCube = new THREE.CubeTextureLoader().load( urls );
+    var textureCube = new THREE.CubeTextureLoader().load( urls );
 
     // MATERIALS
     var onProgress = function ( xhr) {
@@ -177,7 +180,7 @@ function createLight(){
     scene.add(directLight);
     
     scene.add( ambientLight );
-    let rectLight = new THREE.RectAreaLight( 0x333333, 0.5,20, 20 );
+    var rectLight = new THREE.RectAreaLight( 0x333333, 0.5,20, 20 );
     rectLight.intensity = 2;
     rectLight.position.set( 4, 6, 0 );
     rectLight.rotation.x = toRadian(90);
@@ -229,17 +232,17 @@ function animate(time) {
 }
 
 function StopWatch(dur, start, to){
-    let startTime = +Date.now();
+    var startTime = +Date.now();
     var currentTime = 0;
-    let range = to-start;
-    let lastTime =+Date.now()/1000;
+    var range = to-start;
+    var lastTime =+Date.now()/1000;
     return function(time){
         time = +Date.now()/1000;
-        let delayTime =time- lastTime;
+        var delayTime =time- lastTime;
         currentTime = currentTime+ delayTime;
         if (dur < currentTime) return undefined;
          
-        let radtio = currentTime/dur;
+        var radtio = currentTime/dur;
         lastTime = time;
         return start + range * radtio;
     }
@@ -314,4 +317,11 @@ function onWindowResize() {
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize( window.innerWidth, window.innerHeight );
+}
+
+function toggleRotate(){    
+    if (controls.enable)
+        controls.autoRotate = !controls.autoRotate;
+    var autoRotateButton = document.getElementById("toggleRotate");
+    autoRotateButton.innerHTML =  controls.autoRotate ? "Stop" : "Rotate";
 }
