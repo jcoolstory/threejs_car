@@ -1,5 +1,5 @@
 
-
+import vue from "vue";
 var scene , camera , renderer, labelRX, labelRY , offsetX ,offsetY;
 var mainModel, bodyMaterial, raycaster, cursor , interiorMaterial, shadow , theta=0 ,controls
 var radius =15, theta = 0 , enableInner = false , press = false , loading = true , manager;
@@ -55,16 +55,11 @@ function init() {
     raycaster = new THREE.Raycaster();
 }
 
+
+
+
 function createModels() {
     manager = new THREE.LoadingManager();
-    manager.onLoad = function(url, itemsLoaded, itemsTotal){
-        console.log("onLoad");
-        setTimeout(function() {
-            var progressbar = document.getElementById("progressbar");
-            progressbar.style = "display:none";
-            loading = false;
-        }, 1000)
-    };
     var path = "../../res/textures/cube/skybox2/";
 				var urls = [
 					path + "px.jpg", path + "nx.jpg",
@@ -73,23 +68,6 @@ function createModels() {
 				];
 
     var textureCube = new THREE.CubeTextureLoader().load( urls );
-
-    // MATERIALS
-    var onProgress = function ( xhr) {
-        if ( xhr.lengthComputable) {
-            var percentComplate = xhr.loaded / xhr.total * 100;
-            var value = document.getElementById("progressValue");
-            value.innerText = percentComplate.toFixed(0);
-            if (percentComplate == 100) {
-                
-                setTimeout(function() {
-                    var progressbar = document.getElementById("progressbar");
-                    progressbar.style = "display:none";
-                    loading = false;
-                }, 1000)
-            }
-        }
-    };
 
     var onError = function (xhr ) {
     };    
@@ -125,11 +103,10 @@ function createModels() {
                         }
                     }
                 });
-
-                mainModel = object;                
+                mainModel = object;
                 scene.add( object );
                 shadow.visible = true;
-            }, onProgress, onError );
+            }, vueApp.onProgress, onError );
     } );
     
     // create ground
@@ -187,9 +164,6 @@ function createLight(){
     scene.add( rectLight );
 }
 
-function colorChange  (event) {
-    bodyMaterial.color = new THREE.Color(event.value);
-}
 
 function toRadian(degree) {
     return degree * Math.PI / 180 
@@ -199,25 +173,48 @@ function onMouseClick(event) {
     
 }
 
+function toggleView(){
+            
+    if (enableInner) {
+        // resetCamera();
+        controls.enable = true;
+        controls.enableZoom = true;
+        controls.enableRotate = true;
+        controls.enablePan = true;
+        controls.autoRotate = true;
+        animations = [StopWatch(3,camera.position.x,-6),StopWatch(3,camera.position.y,2),StopWatch(3,camera.position.z,6)];
+        
+    } else {
+        
+        controls.enable = false;
+        controls.enableZoom = false;
+        controls.enableRotate = false;
+        controls.enablePan = false;
+        controls.autoRotate = false;                
+        animations = [StopWatch(3,camera.position.x,0.24),StopWatch(3,camera.position.y,1.16),StopWatch(3,camera.position.z,0.422)];
+        
+    }
+    enableInner = !enableInner;
+    return enableInner;
+    
+}
+
 function animate(time) {
     
     requestAnimationFrame( animate );
     if (loading)
         return
     
-    
     if (animations.length){
         
         var result = animations[0](time)
-        if (result== undefined)
-        {
+        if (result== undefined){
             animations.length = 0;
             camera.rotation.x = toRadian(-90);
             camera.rotation.y = toRadian(90);
             camera.rotation.z = toRadian(90);
         }
-        else
-        {
+        else {
             camera.position.x = animations[0](time);
             camera.position.y = animations[1](time);
             camera.position.z = animations[2](time);
@@ -246,35 +243,6 @@ function StopWatch(dur, start, to){
         lastTime = time;
         return start + range * radtio;
     }
-}
-
-function toggleinner(){
-    if (enableInner) {
-        // resetCamera();
-        controls.enable = true;
-        controls.enableZoom = true;
-        controls.enableRotate = true;
-        controls.enablePan = true;
-        controls.autoRotate = true;
-        animations = [StopWatch(3,camera.position.x,-6),StopWatch(3,camera.position.y,2),StopWatch(3,camera.position.z,6)];
-        var toggle =  document.getElementById("toggleButton");
-        toggle.value = "Inner Interior";
-        
-    } else {
-        
-        controls.enable = false;
-        controls.enableZoom = false;
-        controls.enableRotate = false;
-        controls.enablePan = false;
-        controls.autoRotate = false;
-        // controls.mouse
-        animations = [StopWatch(3,camera.position.x,0.24),StopWatch(3,camera.position.y,1.16),StopWatch(3,camera.position.z,0.422)];
-        var toggle =  document.getElementById("toggleButton");
-        toggle.value = "Out Interior";
-        
-    }
-    enableInner = !enableInner;
-    
 }
 
 function onMouseMove(event){
@@ -319,9 +287,52 @@ function onWindowResize() {
     renderer.setSize( window.innerWidth, window.innerHeight );
 }
 
-function toggleRotate(){    
-    if (controls.enable)
-        controls.autoRotate = !controls.autoRotate;
-    var autoRotateButton = document.getElementById("toggleRotate");
-    autoRotateButton.innerHTML =  controls.autoRotate ? "Stop" : "Rotate";
-}
+var vueApp = new vue({
+    el : "#wrap",
+    data: function() {
+        return {
+            load : false,
+            bodyColor : "",
+            statusView : "Inner View",
+            statusRotate : "Stop",
+            progressValue : 0
+        }
+    },
+    computed :{
+        progressText() {
+            return this.progressValue.toFixed(0);
+        }
+    },
+    methods : {
+        
+        // MATERIALS
+        onProgress  ( xhr) {
+            if ( xhr.lengthComputable) {
+                var percentComplate = xhr.loaded / xhr.total * 100;
+                this.progressValue = percentComplate;
+                if (percentComplate == 100) {
+                    setTimeout(function() {
+                        vueApp.loadFinish();
+                    }, 1000)
+                }
+            }
+        },
+
+        loadFinish(){
+            this.load = true;
+        },
+        colorChange  (event) {
+            bodyMaterial.color = new THREE.Color(this.bodyColor);
+        },
+    
+        toggleRotate(){    
+            if (controls.enable)
+                controls.autoRotate = !controls.autoRotate;
+            this.statusRotate =  controls.autoRotate ?   "Stop" : "Rotate";
+        },
+    
+        toggleinner(){
+            this.statusView =  toggleView() ? "Out View" : "Inner View";
+        }
+    }
+})
