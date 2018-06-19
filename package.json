@@ -5,14 +5,29 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "server" : "http-server"
+    "server": "http-server",
+    "release-configurator": " cd ./configurator &&  cross-env NODE_ENV=production  webpack --progress --hide-modules",
+    "dev-configurator": " cd ./configurator &&  cross-env NODE_ENV=dev  webpack --progress --hide-modules"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "three": "^0.92.0"
+    "three": "^0.92.0",
+    "vue": "^2.5.16"
   },
   "devDependencies": {
-    "http-server": "^0.11.1"
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-vue": "^2.0.2",
+    "cross-env": "^5.2.0",
+    "css-loader": "^0.28.7",
+    "file-loader": "^1.1.4",
+    "http-server": "^0.11.1",
+    "uglifyjs-webpack-plugin": "^1.2.5",
+    "vue-loader": "^13.0.5",
+    "vue-template-compiler": "^2.4.4",
+    "webpack": "^3.6.0"
   }
 }
