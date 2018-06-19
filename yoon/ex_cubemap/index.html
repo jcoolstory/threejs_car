@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html LANG="" dir="">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0, minimal-ui=1">
+
+    <title>Inside Renault Kadjar - WebVR Experience</title>
+
+    <meta property="og:title"
+    content="Inside Renault Kadjar - WebVR Experience">
+    <meta property="og:url" content="http://kadjar.littleworkshop.fr">
+    <meta property="og:description" content="Explore the interior of the all-new SUV by Renault in VR with your Web browser.">
+    <link rel="stylesheet" type="text/css" href="/css/main.css?v=1481729814779">
+
+  </head>
+  <body>
+    <div class="preloading">
+      <img src="img/vr-hover.png">
+    </div>
+
+    <div class="loading">
+      <div class="desktop">
+        <div class="main-logo"></div>
+        <div class="content">
+          <h1>Inside Renault <strong>KADJAR</strong></h1>
+          <h2>WebVR Experience</h2>
+          <div class="intro">
+            <div class="icon-vr"></div>Explore and customize the KADJAR interior
+          </div>
+          <div class="warning">Your browser doesn't support WebVR. <a href="https://webvr.info/">Fix this</a></div>
+          <div class="progress"><span class="text">Loading</span><span class="percentage">0</span>%</div>
+          <div class="start"><div class="icon"></div>Start</div>
+        </div>
+        <div class="credits">
+          <div class="text">
+              This is a collaboration between Renault, <br>Little Workshop and Oculus. <a target="_blank" href="http://www.littleworkshop.fr/kadjar">Read more</a>
+          </div>
+          <div class="logos">
+            <div class="logo renault"><a target="_blank" href="http://www.renault.fr"></a></div>
+            <div class="logo lw"><a target="_blank" href="http://www.littleworkshop.fr"></a></div>
+            <div class="logo oculus"><a target="_blank" href="http://www.oculus.com"></a></div>
+          </div>
+        </div>
+        <div class="sharing">
+          <div class="text">Share<br> this</div>
+          <div class="buttons">
+            <div class="twitter js-sharing" data-href="https://twitter.com/share?url=http%3A%2F%2Fkadjar.littleworkshop.fr&related=glecollinet&text=Explore%20the%20interior%20of%20Renault%20Kadjar%20in%20%23WebVR" data-width="575" data-height="400"></div>
+            <div class="facebook js-sharing" data-href="https://www.facebook.com/sharer/sharer.php?u=http://kadjar.littleworkshop.fr" data-width="575" data-height="400"></div>
+          </div>
+        </div>
+      </div>
+      <div class="mobile">
+        <div class="topbar">
+          <h1>Inside Renault <strong>KADJAR</strong></h1>
+          <div class="mobile-logo"></div>
+        </div>
+        <div class="content">
+          <div class="intro">
+            Explore and customize the all-new KADJAR
+          </div>
+          <!-- <div class="warning">Your browser doesn't support WebVR. <a href="https://webvr.info/">Fix this</a></div> -->
+          <div class="progress"><span class="text">Loading</span><span class="percentage">0</span>%</div>
+          <div class="start"><div class="icon"></div>Start</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="resume">
+      <div class="inner">
+        <div>Click anywhere to resume</div>
+      </div>
+    </div>
+
+    <canvas style="display: none;"></canvas>
+
+
+    <script src="js/lib/vr-utils.js"></script>
+    <script src="js/lib/webvr-polyfill.js"></script>
+    <script src="js/lib/jquery.js"></script>
+    <script src="js/lib/three.js"></script>
+    <script src="js/main.min.js?v=1481729814779"></script>
+  </body>
+</html>
