@@ -1,6 +1,6 @@
 var sacne , camera , renderer, labelRX, labelRY;
 var mainModel, bodyMaterial, raycaster, cursor , interiorMaterial, shadow , theta=0 ,controls
-var radius =15, theta = 0;
+var radius =15, theta = 0,shadowMet;
 var  hemisphereLight, ambientLight, pointLight, directLight, rectLight;
 var mouse = new THREE.Vector2(), INTERSECTED;
 var rightDoor = {name:"Mesh74_032Gruppe_12_1_032Group1_032Lamborghini_Aventador1_032Model", opened:false};
@@ -94,7 +94,7 @@ function createModels() {
                         } else if (child.material.name == "interior"){
                             if (interiorMaterial == undefined)
                             {
-                                interiorMaterial = new THREE.MeshLambertMaterial({color:0x333333});
+                                interiorMaterial = new THREE.MeshLambertMaterial({color:0x222222});
                             }
                             child.material =interiorMaterial;
                         } else if (child.material.name == "Glass"){
@@ -109,11 +109,7 @@ function createModels() {
                 mainModel = object;                
                 scene.add( object );
                 shadow.visible = true;
-                // var box = new THREE.BoxHelper( object, 0xffff00 );
-                // scene.add(box);
-                // box.geometry.computeBoundingBox();
-                // console.log(mainModel.children);
-                var names = object.children.reduce((p,c)=>{
+                var names = object.children.reduce(function(p,c){
                     if (c.material.name in p) {
                         p[c.material.name].push(c.material);
                     }
@@ -126,21 +122,23 @@ function createModels() {
             }, onProgress, onError );
     } );
     
-    // // create ground
-    // var groundTexture =  new THREE.TextureLoader().load("../res/crocodile--skin-texture.jpg");
-    // var groundGeo = new THREE.PlaneBufferGeometry( 50, 50 );
-    // var groundMat = new THREE.MeshBasicMaterial( { color: 0xffffff } );
-    // // groundMat.map = groundTexture;
-    // // groundMat.color.setHSL( 0.095, 0.095, 0.095 );
-    // var ground = new THREE.Mesh( groundGeo, groundMat );
-    // ground.rotation.x = -Math.PI/2;
-    // ground.position.y = 0;
-    // scene.add(ground);
+    
+    // // create ground    
+    var groundTexture =  new THREE.TextureLoader().load("../../res/textures/ground/TARMAC2.jpg");
+    groundTexture.wrapS = THREE.RepeatWrapping;
+    groundTexture.wrapT = THREE.RepeatWrapping;
+    groundTexture.repeat.set( 4, 4 );
+    var groundGeo = new THREE.PlaneGeometry( 40, 40,1,1 );
+    var groundMat = new THREE.MeshBasicMaterial({ color:0x555555, map:groundTexture});
 
+    var ground = new THREE.Mesh( groundGeo, groundMat );
+    ground.rotation.x = -Math.PI/2;
+    ground.position.y = 0;
+    scene.add(ground);
 
     var shadowTexture =  new THREE.TextureLoader().load("../res/car_shadow.png");
     var shadowGeometry = new THREE.PlaneBufferGeometry( 7, 4 );
-    var shadowMet = new THREE.MeshBasicMaterial( { color: 0xffffff , map: shadowTexture} );
+    shadowMet = new THREE.MeshBasicMaterial( { color: 0xaaaaaa , map: shadowTexture, transparent:true} );
     shadow = new THREE.Mesh( shadowGeometry, shadowMet );
     shadow.rotation.x = -Math.PI/2;
     shadow.position.y = 0.01;
@@ -148,14 +146,18 @@ function createModels() {
     scene.add(shadow);
 
     // // create dome
-    // var domeMaterial = new THREE.MeshBasicMaterial( { color:0xffffff ,side: THREE.DoubleSide } );
-    // var dome = new THREE.Mesh( new THREE.SphereBufferGeometry( 20, 20, 10 ), domeMaterial );
-    // scene.add( dome );
+    var domTexture =   new THREE.TextureLoader().load("../../res/textures/ground/pattern.png");
+    domTexture.wrapS = THREE.RepeatWrapping;
+    domTexture.wrapT = THREE.RepeatWrapping;
+    domTexture.repeat.set( 4, 4 );
+    var domeMaterial = new THREE.MeshBasicMaterial( { color:0x555555 , map : groundTexture , side: THREE.BackSide } );
+    var dome = new THREE.Mesh( new THREE.SphereBufferGeometry( 20, 20, 10 ), domeMaterial );
+    // var dome = new THREE.Mesh( new THREE.BoxBufferGeometry( 30, 30, 30 ), domeMaterial );
+    scene.add( dome );
 
     cursor = new THREE.Mesh( new THREE.SphereBufferGeometry( 0.02, 20, 10 ), new THREE.MeshBasicMaterial({color:0xdddddd}) );
     cursor.position.set( 0, 0, 0 );
     scene.add( cursor );
-
 }
 
 function createLight(){
@@ -168,102 +170,16 @@ function createLight(){
     directLight.position.y = 5;
     directLight.position.z = 5;
     
-    pointLight.position.x = -5;
-    pointLight.position.y = 5;
-    pointLight.position.z = -5;
-    camera.add(directLight);
+    pointLight.position.x = 0;
+    pointLight.position.y = 15;
+    pointLight.position.z = 0;
+    // camera.add(directLight);
     scene.add(hemisphereLight);
-    // scene.add(pointLight);
+    scene.add(pointLight);
     camera.add(directLight);
     scene.add( ambientLight );
-    
-    
-    // var p = new THREE.DirectionalLightHelper( directLight);
-    // // p.position.y = 0.5;
-    // scene.add(p);
-
-    
-    // rectLight = new THREE.RectAreaLight( 0x333333, 0.5,20, 20 );
-    // rectLight.intensity = 2;
-    // rectLight.position.set( 4, 6, 0 );
-    // rectLight.rotation.x = toRadian(90);
-    // scene.add( rectLight );
-    
-
-    // var rectLightMesh = new THREE.Mesh( new THREE.PlaneBufferGeometry(), new THREE.MeshBasicMaterial() );
-    // rectLightMesh.scale.x = rectLight.width;
-    // rectLightMesh.scale.y = rectLight.height;
-    // rectLight.add( rectLightMesh );
-
-    // var rectLightMeshBack = new THREE.Mesh( new THREE.PlaneBufferGeometry(), new THREE.MeshBasicMaterial( { color: 0x080808 } ) );
-    // rectLightMeshBack.rotation.y = Math.PI;
-    // rectLightMesh.add( rectLightMeshBack );
-
 }
 
-// function setupGui() {
-//     var h;
-//     var gui = new dat.GUI();
-//     h = gui.addFolder( "Light control" );
-//     // var API = { ...bodyMaterial}
-//     // console.log("API",API)
-//     // x = {
-//     //     [THREE.Color]: function(API,proprety){
-//     //         // API[proprety] = API[proprety].getHexString();
-//     //         return {
-//     //             set [proprety](value) {
-//     //                 //gui = new dat.GUI()
-//     //                 console.log("set:",value);
-//     //             },
-//     //             get [proprety](){
-//     //                 return API[proprety].getHexString();
-//     //             }
-//     //         }
-//     //     }
-
-//     // }
-//     // keys.forEach(e=>{
-//     //     // console.log(e,API[e]);
-//     //     if (API[e] &&  x[API[e].constructor]){
-//     //         // = x[API[e].constructor](API,e)
-//     //         API = {
-//     //             ...API,
-//     //             ...x[API[e].constructor](API,e)
-//     //         }
-//     //     }
-//     //     // else {
-//     //     //     return e;
-//     //     // }
-//     // });
-//     // console.log(API);
-//     var API = {
-//         get color(){
-//             return bodyMaterial.color.getHexString();
-//         },
-//         set color(value){
-//             console.log(new THREE.Color(parseInt("0x"+value)))
-//             return bodyMaterial.color.set(0xff0000);
-//         }
-//     }
-//     console.log(API);
-//     var keys = Object.keys(API);
-//     keys.forEach(e=>{
-//         try {
-//             //  console.log(API[e].constructor);
-//             // if (API[e].constructor == THREE.Color) {
-//             //     API[e] = API[e].getHexString();
-//             //     // h.add(API,e);// = API[e].getHex();//
-//             // }
-//             console.log(e);
-//             h.add(API,e).onChange(()=>{ bodyMaterial[e] = API[e]; });
-//         }
-//         catch(ex) { console.log(ex,e) }
-//     });
-//     // h.add( API, 'metalness',0.0, 1.00, 0.1).onChange(()=>{
-//     //     bodyMaterial.metalness = API.metalness;
-//     // })
-    
-// }
 
 function setupGui(){
     var h;
@@ -277,25 +193,15 @@ function setupGui(){
         {name:"direct", obj:directLight},
         // {name:"rect", obj:rectLight},
     ]
-    controls.forEach(e=>{
+    controls.forEach(function(e){
         var hx=h.addFolder(e.name);
         addTree(hx,e.obj,0);
     })
 
     var hx = gui.addFolder("body")
     addTree(hx,bodyMaterial,0);
-    // h = gui.addFolder();
-    // //h.add(directLight)
-    // var keys = Object.keys(directLight);
-    // keys.forEach(e=>{
-    //     //if (directLight[e])//
-    //     try {
-    //         if (typeof(directLight[e]) == "object")
-    //             h.addFolder(e);
-    //         h.add(directLight,e);//.onChange(()=>{ directLight[e] = API[e]; });
-    //     }
-    //     catch(ex) {}
-    // });
+    var hx = gui.addFolder("shadow");
+    addTree(hx,shadowMet);
 }
 
 function addTree(gui,obj, depth){
@@ -304,7 +210,7 @@ function addTree(gui,obj, depth){
         return;
     
     var keys = Object.keys(obj);
-    keys.forEach(e=>{
+    keys.forEach(function(e){
         //if (directLight[e])//
         try {
             if (typeof(obj[e]) == "object"){
@@ -389,11 +295,6 @@ function animate(time) {
     requestAnimationFrame( animate );
     raycaster.setFromCamera( mouse, camera );
     controls.update();
-    // theta += 0.1;
-    // camera.position.x = radius * Math.sin( THREE.Math.degToRad( theta ) );
-    // // camera.position.y = radius * Math.sin( THREE.Math.degToRad( theta ) );
-    // camera.position.z = radius * Math.cos( THREE.Math.degToRad( theta ) );
-    // camera.lookAt( scene.position );
 
     if (mainModel) {
         var intersects = raycaster.intersectObjects( mainModel.children );
