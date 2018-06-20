@@ -1,4 +1,3 @@
-
 import vue from "vue";
 var scene , camera , renderer, labelRX, labelRY , offsetX ,offsetY;
 var mainModel, bodyMaterial, raycaster, cursor , interiorMaterial, shadow , theta=0 ,controls
@@ -13,9 +12,9 @@ init();
 animate();
 
 function resetCamera(){
-    camera.position.z = 6;
+    camera.position.z = 5;
     camera.position.y = 2;
-    camera.position.x = -6;
+    camera.position.x = -5;
 
     camera.rotation.x = -0.329;
     camera.rotation.y = -0.75;
@@ -61,12 +60,12 @@ function createModels() {
     manager.onLoad= (f=> {
         loading = false;
     })
-    var path = "../../res/textures/cube/skybox2/";
-				var urls = [
-					path + "px.jpg", path + "nx.jpg",
-					path + "py.jpg", path + "ny.jpg",
-					path + "pz.jpg", path + "nz.jpg"
-				];
+    var path = "../../res/textures/cube/reflectIndoor/";
+    var urls = [
+        path + "px.jpg", path + "nx.jpg",
+        path + "py.jpg", path + "ny.jpg",
+        path + "pz.jpg", path + "nz.jpg"
+    ];
 
     var textureCube = new THREE.CubeTextureLoader().load( urls );
 
@@ -83,13 +82,17 @@ function createModels() {
             .load( 'Avent.obj', function ( object ) {
                 object.traverse ( function ( child ) { 
                     
-                    if (child.material)
-                    {
+                    if (child.material) {
                         if ( child.material.name === "Body") {
                             if (bodyMaterial == undefined)
                             {
-                                bodyMaterial =  new THREE.MeshStandardMaterial( );
-                                bodyMaterial.copy(child.material);
+
+                                bodyMaterial = child.material;
+                                bodyMaterial.envMap = textureCube;
+                                bodyMaterial.reflectivity = 0.3;
+                                bodyMaterial.emissive = new THREE.Color(0.1,0.1,0.1);
+                                // bodyMaterial =  new THREE.MeshStandardMaterial( );
+                                // bodyMaterial.copy(child.material);
                                 vueApp.bodyColor = "#" + bodyMaterial.color.getHexString();
                                 
                             }
@@ -100,70 +103,74 @@ function createModels() {
                                 interiorMaterial = new THREE.MeshLambertMaterial({color:0x333333});
                             }
                             child.material =interiorMaterial;
-                        } else {
+                        } else  if (child.material.name == "Glass"){
+                            child.material.color = new THREE.Color(0.3,0.3,0.3);
+                            child.material.envMap = textureCube;
+                            child.material.reflectivity = 1;
+                            child.material.opacity = 0.5; 
 
                         }
                     }
-                });
+                    });
                 mainModel = object;
                 scene.add( object );
                 shadow.visible = true;
             }, vueApp.onProgress, onError );
     } );
     
-    // create ground
-    var groundTexture =  new THREE.TextureLoader().load("../res/crocodile--skin-texture.jpg");
-    var groundGeo = new THREE.PlaneBufferGeometry( 50, 50 );
-    var groundMat = new THREE.MeshBasicMaterial( { color: 0xffffff } );
-    // groundMat.map = groundTexture;
-    // groundMat.color.setHSL( 0.095, 0.095, 0.095 );
+    // // create ground    
+    var groundTexture =  new THREE.TextureLoader().load("../../res/textures/ground/TARMAC2.jpg");
+    groundTexture.wrapS = THREE.RepeatWrapping;
+    groundTexture.wrapT = THREE.RepeatWrapping;
+    groundTexture.repeat.set( 4, 4 );
+    var groundGeo = new THREE.PlaneGeometry( 40, 40,1,1 );
+    var groundMat = new THREE.MeshBasicMaterial({ color:0x555555, map:groundTexture});
+
     var ground = new THREE.Mesh( groundGeo, groundMat );
     ground.rotation.x = -Math.PI/2;
     ground.position.y = 0;
     scene.add(ground);
 
-
     var shadowTexture =  new THREE.TextureLoader().load("../res/car_shadow.png");
     var shadowGeometry = new THREE.PlaneBufferGeometry( 7, 4 );
-    var shadowMet = new THREE.MeshBasicMaterial( { color: 0xffffff , map: shadowTexture} );
+    var shadowMet = new THREE.MeshBasicMaterial( { color: 0xaaaaaa , map: shadowTexture, transparent:true} );
     shadow = new THREE.Mesh( shadowGeometry, shadowMet );
     shadow.rotation.x = -Math.PI/2;
     shadow.position.y = 0.01;
     shadow.visible = false;
     scene.add(shadow);
 
-    // create dome
-    var domeMaterial = new THREE.MeshBasicMaterial( { color:0xffffff ,side: THREE.DoubleSide } );
+    // // create dome
+    var domTexture =   new THREE.TextureLoader().load("../../res/textures/ground/pattern.png");
+    domTexture.wrapS = THREE.RepeatWrapping;
+    domTexture.wrapT = THREE.RepeatWrapping;
+    domTexture.repeat.set( 4, 4 );
+    var domeMaterial = new THREE.MeshBasicMaterial( { color:0x555555 , map : groundTexture , side: THREE.BackSide } );
     var dome = new THREE.Mesh( new THREE.SphereBufferGeometry( 20, 20, 10 ), domeMaterial );
+    // var dome = new THREE.Mesh( new THREE.BoxBufferGeometry( 30, 30, 30 ), domeMaterial );
     scene.add( dome );
-
-    // cursor = new THREE.Mesh( new THREE.SphereBufferGeometry( 0.02, 20, 10 ), new THREE.MeshBasicMaterial({color:0xdddddd}) );
-    // cursor.position.set( 0, 0, 0 );
-    // scene.add( cursor );
 
 }
 
 function createLight(){
     
-    var ambientLight = new THREE.AmbientLight( 0x333333,0.3 );
-    var directLight = new THREE.DirectionalLight(0xfffffff,1);
+    var hemisphereLight = new THREE.HemisphereLight( 0x111111, 0x666655 )     
+    var ambientLight = new THREE.AmbientLight( 0x333333,0.6 );
+    var pointLight = new THREE.PointLight( 0xeeeeee, 1);
+    var directLight = new THREE.DirectionalLight(0xffffff, 1);
+
     directLight.position.x = 5;
     directLight.position.y = 5;
     directLight.position.z = 5;
-   
-    var pointLight = new THREE.PointLight( 0xffffff, 0.3);
-    pointLight.position.x = -5;
-    pointLight.position.y = 5;
-    pointLight.position.z = -5;
-    camera.add(directLight);
     
+    pointLight.position.x = 0;
+    pointLight.position.y = 15;
+    pointLight.position.z = 0;
+    // camera.add(directLight);
+    scene.add(hemisphereLight);
+    scene.add(pointLight);
+    camera.add(directLight);
     scene.add( ambientLight );
-
-    var rectLight = new THREE.RectAreaLight( 0x333333, 0.5,20, 20 );
-    rectLight.intensity = 2;
-    rectLight.position.set( 4, 6, 0 );
-    rectLight.rotation.x = toRadian(90);
-    scene.add( rectLight );
 }
 
 
