@@ -8,6 +8,7 @@ module.exports = {
   },
   entry: 
   {
+    'interior':'./interior/app.js',
     'lamborghini':'./lamborghini/app.js',    
   },
   output: {
