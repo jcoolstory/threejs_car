@@ -1,6 +1,6 @@
 var sacne , camera , renderer, labelRX, labelRY;
 var mainModel, bodyMaterial, raycaster, cursor , interiorMaterial, shadow , theta=0 ,controls
-var radius =15, theta = 0,shadowMet;
+var radius =15, theta = 0,groundMat, textureCubeBlur , domeMaterial;
 var  hemisphereLight, ambientLight, pointLight, directLight, rectLight;
 var mouse = new THREE.Vector2(), INTERSECTED;
 var rightDoor = {name:"Mesh74_032Gruppe_12_1_032Group1_032Lamborghini_Aventador1_032Model", opened:false};
@@ -58,6 +58,16 @@ function createModels() {
     ];
 
     textureCube = new THREE.CubeTextureLoader().load( urls );
+
+    var path2 = "../../res/textures/cube/reflectIndoor-blur/";
+    var urls2 = [
+        path2 + "px.jpg", path2 + "nx.jpg",
+        path2 + "py.jpg", path2 + "ny.jpg",
+        path2 + "pz.jpg", path2 + "nz.jpg"
+    ];
+
+    textureCubeBlur = new THREE.CubeTextureLoader().load(urls2);
+
     
     //renderer.background = textureCube;
     // MATERIALS
@@ -129,7 +139,10 @@ function createModels() {
     groundTexture.wrapT = THREE.RepeatWrapping;
     groundTexture.repeat.set( 4, 4 );
     var groundGeo = new THREE.PlaneGeometry( 40, 40,1,1 );
-    var groundMat = new THREE.MeshBasicMaterial({ color:0x555555, map:groundTexture});
+    groundMat = new THREE.MeshPhongMaterial({ color:0xaaaaaa, map: groundTexture});
+    groundMat.envMap = textureCubeBlur;
+    groundMat.reflectivity  = 0.3;
+
 
     var ground = new THREE.Mesh( groundGeo, groundMat );
     ground.rotation.x = -Math.PI/2;
@@ -146,12 +159,15 @@ function createModels() {
     scene.add(shadow);
 
     // // create dome
-    var domTexture =   new THREE.TextureLoader().load("../../res/textures/ground/pattern.png");
+    var domTexture =   new THREE.TextureLoader().load("../../res/textures/ground/bg03_kabe_01.png");
     domTexture.wrapS = THREE.RepeatWrapping;
     domTexture.wrapT = THREE.RepeatWrapping;
     domTexture.repeat.set( 4, 4 );
-    var domeMaterial = new THREE.MeshBasicMaterial( { color:0x555555 , map : groundTexture , side: THREE.BackSide } );
-    var dome = new THREE.Mesh( new THREE.SphereBufferGeometry( 20, 20, 10 ), domeMaterial );
+    domeMaterial = new THREE.MeshPhongMaterial( { color:0xeeeeef , side: THREE.BackSide, map:groundTexture } );
+    domeMaterial.envMap = textureCubeBlur;
+    domeMaterial.reflectivity = 0.6;
+
+    var dome = new THREE.Mesh( new THREE.CylinderBufferGeometry( 15, 15, 20,16 ), domeMaterial );
     // var dome = new THREE.Mesh( new THREE.BoxBufferGeometry( 30, 30, 30 ), domeMaterial );
     scene.add( dome );
 
@@ -176,7 +192,6 @@ function createLight(){
     // camera.add(directLight);
     scene.add(hemisphereLight);
     scene.add(pointLight);
-    camera.add(directLight);
     scene.add( ambientLight );
 }
 
@@ -201,7 +216,7 @@ function setupGui(){
     var hx = gui.addFolder("body")
     addTree(hx,bodyMaterial,0);
     var hx = gui.addFolder("shadow");
-    addTree(hx,shadowMet);
+    addTree(hx,groundMat);
 }
 
 function addTree(gui,obj, depth){
