@@ -69,6 +69,15 @@ function createModels() {
 
     var textureCube = new THREE.CubeTextureLoader().load( urls );
 
+    var path2 = "../../res/textures/cube/reflectIndoor-blur/";
+    var urls2 = [
+        path2 + "px.jpg", path2 + "nx.jpg",
+        path2 + "py.jpg", path2 + "ny.jpg",
+        path2 + "pz.jpg", path2 + "nz.jpg"
+    ];
+
+    var textureCubeBlur = new THREE.CubeTextureLoader().load(urls2);
+
     var onError = function (xhr ) {
     };    
     
@@ -84,52 +93,49 @@ function createModels() {
                     
                     if (child.material) {
                         if ( child.material.name === "Body") {
-                            if (bodyMaterial == undefined)
-                            {
+                            if (bodyMaterial == undefined) {
 
                                 bodyMaterial = child.material;
                                 bodyMaterial.envMap = textureCube;
                                 bodyMaterial.reflectivity = 0.3;
                                 bodyMaterial.emissive = new THREE.Color(0.1,0.1,0.1);
-                                // bodyMaterial =  new THREE.MeshStandardMaterial( );
-                                // bodyMaterial.copy(child.material);
                                 vueApp.bodyColor = "#" + bodyMaterial.color.getHexString();
-                                
                             }
                             child.material = bodyMaterial;
-                        } else if (child.material.name == "interior"){
-                            if (interiorMaterial == undefined)
-                            {
+                        } else if (child.material.name == "interior") {
+                            if (interiorMaterial == undefined) {
                                 interiorMaterial = new THREE.MeshLambertMaterial({color:0x333333});
                             }
                             child.material =interiorMaterial;
-                        } else  if (child.material.name == "Glass"){
+                        } else  if (child.material.name == "Glass") {
                             child.material.color = new THREE.Color(0.3,0.3,0.3);
                             child.material.envMap = textureCube;
                             child.material.reflectivity = 1;
                             child.material.opacity = 0.5; 
-
                         }
                     }
-                    });
+                });
                 mainModel = object;
                 scene.add( object );
                 shadow.visible = true;
             }, vueApp.onProgress, onError );
     } );
     
-    // // create ground    
-    var groundTexture =  new THREE.TextureLoader().load("../../res/textures/ground/TARMAC2.jpg");
-    groundTexture.wrapS = THREE.RepeatWrapping;
-    groundTexture.wrapT = THREE.RepeatWrapping;
-    groundTexture.repeat.set( 4, 4 );
-    var groundGeo = new THREE.PlaneGeometry( 40, 40,1,1 );
-    var groundMat = new THREE.MeshBasicMaterial({ color:0x555555, map:groundTexture});
+    ///
+    /// showroomt을 white color 변경시 필요없음
+    /// 
+    // // // create ground    
+    // var groundTexture =  new THREE.TextureLoader().load("../../res/textures/ground/TARMAC2.jpg");
+    // groundTexture.wrapS = THREE.RepeatWrapping;
+    // groundTexture.wrapT = THREE.RepeatWrapping;
+    // groundTexture.repeat.set( 4, 4 );
+    // var groundGeo = new THREE.PlaneGeometry( 40, 40,1,1 );
+    // var groundMat = new THREE.MeshBasicMaterial({ color:0x555555, map:groundTexture});
 
-    var ground = new THREE.Mesh( groundGeo, groundMat );
-    ground.rotation.x = -Math.PI/2;
-    ground.position.y = 0;
-    scene.add(ground);
+    // var ground = new THREE.Mesh( groundGeo, groundMat );
+    // ground.rotation.x = -Math.PI/2;
+    // ground.position.y = 0;
+    // scene.add(ground);
 
     var shadowTexture =  new THREE.TextureLoader().load("../res/car_shadow.png");
     var shadowGeometry = new THREE.PlaneBufferGeometry( 7, 4 );
@@ -140,21 +146,25 @@ function createModels() {
     shadow.visible = false;
     scene.add(shadow);
 
-    // // create dome
+    // // create dome or cylinder
     var domTexture =   new THREE.TextureLoader().load("../../res/textures/ground/pattern.png");
     domTexture.wrapS = THREE.RepeatWrapping;
     domTexture.wrapT = THREE.RepeatWrapping;
     domTexture.repeat.set( 4, 4 );
-    var domeMaterial = new THREE.MeshBasicMaterial( { color:0x555555 , map : groundTexture , side: THREE.BackSide } );
-    var dome = new THREE.Mesh( new THREE.SphereBufferGeometry( 20, 20, 10 ), domeMaterial );
+    var domeMaterial = new THREE.MeshBasicMaterial( { color:0xffffff , side: THREE.BackSide } );
+    domeMaterial.envMap = textureCubeBlur;
+    domeMaterial.reflectivity = 0.2;
+
+    var dome = new THREE.Mesh( new THREE.CylinderBufferGeometry( 15, 15, 20,32 ), domeMaterial );
+    dome.position.y = 10;
+    // var dome = new THREE.Mesh( new THREE.SphereBufferGeometry( 20, 20, 10 ), domeMaterial );
     // var dome = new THREE.Mesh( new THREE.BoxBufferGeometry( 30, 30, 30 ), domeMaterial );
     scene.add( dome );
-
 }
 
 function createLight(){
     
-    var hemisphereLight = new THREE.HemisphereLight( 0x111111, 0x666655 )     
+    var hemisphereLight = new THREE.HemisphereLight( 0x111111, 0xffffff )     
     var ambientLight = new THREE.AmbientLight( 0x333333,0.6 );
     var pointLight = new THREE.PointLight( 0xeeeeee, 1);
     var directLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -169,7 +179,7 @@ function createLight(){
     // camera.add(directLight);
     scene.add(hemisphereLight);
     scene.add(pointLight);
-    camera.add(directLight);
+    // camera.add(directLight);
     scene.add( ambientLight );
 }
 
@@ -200,7 +210,7 @@ function toggleView(){
         controls.enableRotate = false;
         controls.enablePan = false;
         controls.autoRotate = false;                
-        animations = [StopWatch(3,camera.position.x,0.24),StopWatch(3,camera.position.y,1.16),StopWatch(3,camera.position.z,0.422)];
+        animations = [StopWatch(3,camera.position.x,0.26),StopWatch(3,camera.position.y,1.16),StopWatch(3,camera.position.z,0.442)];
         
     }
     enableInner = !enableInner;
@@ -255,25 +265,19 @@ function StopWatch(dur, start, to){
 }
 
 function onMouseMove(event){
+    
     mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
     mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+    // innerview 일때만
     if (controls.enable == false && press ){
         var velocityX = event.offsetX - offsetX;
         var velocityY = event.offsetY - offsetY;
         
+        camera.rotateOnAxis(new THREE.Vector3(0,1,0), toRadian(velocityX/5));
+
         offsetX = event.offsetX;
         offsetY = event.offsetY;
-        
-        camera.rotateOnAxis(new THREE.Vector3(0,1,0), toRadian(velocityX/5));
-        
     }
-    // else {
-    //     var velocityX = event.offsetX - offsetX;
-    //     var velocityY = event.offsetY - offsetY;
-        
-    //     offsetX = event.offsetX;
-    //     offsetY = event.offsetY;
-    // }
 }
 
 function onMouseDown(event) {
@@ -289,8 +293,6 @@ function onMouseUp(event) {
 }
 
 function onWindowResize() {
-    windowHalfX = window.innerWidth / 2;
-    windowHalfY = window.innerHeight / 2;
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize( window.innerWidth, window.innerHeight );
