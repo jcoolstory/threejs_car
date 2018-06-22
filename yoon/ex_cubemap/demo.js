@@ -613,7 +613,7 @@
             return this.cubemaps && (e.cubemap = i.loadSpecularCubemaps(this.cubemaps)),
             this.panoramas && (e.panorama = i.loadPanoramas(this.panoramas)),
             this.sh && (e.sh = i.loadSH(this.sh)),
-            this.textures && (e.texture = i.loadTextures(this.textures, "/")),
+            this.textures && (e.texture = i.loadTextures(this.textures, "./")),
             r.props(e)
         }
         ,
@@ -741,7 +741,7 @@
         }
         ,
         b.getCubemap = function(e) {
-            return g.get(e + "/cubemap.bin")
+            //return g.get(e + "/cubemap.bin")
         }
         ,
         b.getSH = function(e) {
@@ -9924,10 +9924,6 @@
                 this.pointerLock = e.pointerLock,
                 this.$container = $(document.body),
                 this.updateContainerInfo(),
-                d.loadAll().then(function() {
-                    this.audioLoaded = !0
-                }
-                .bind(this)),
                 this.initCamera(),
                 this.initControls(),
                 this.initObjectPicker(),
@@ -10293,21 +10289,6 @@
                 this.tweens = {
                     fade: new TWEEN.Tween
                 }
-            },
-            loadAll: function() {
-                var e = canPlayMp3 ? ".mp3" : ".ogg";
-                return new i(function(t, n) {
-                    var i = 0;
-                    r.addEventListener("fileload", function(e) {
-                        i++,
-                        i === o.length && t()
-                    }
-                    .bind(this)),
-                    _.each(o, function(t) {
-                        r.registerSound("audio/" + t + e, t)
-                    })
-                }
-                )
             },
             play: function(e, t, n) {
                 var n = void 0 !== n ? n : 1;
@@ -13671,7 +13652,7 @@
             sh: [v.ENV],
             textures: ["textures/white.png", "textures/spacebar.png", "textures/normal.png", "textures/slideshow/1.jpg", "textures/slideshow/2.jpg", "textures/slideshow/3.jpg", "textures/slideshow/4.jpg", "textures/cubemaps/common/negx.jpg", "textures/cubemaps/common/negz.jpg", "textures/cubemaps/common/posy.jpg", "textures/cubemaps/manual-leather/negy.jpg", "textures/cubemaps/manual-leather/posx.jpg", "textures/cubemaps/manual-leather/posz.jpg", "textures/cubemaps/manual-cloth/negy.jpg", "textures/cubemaps/manual-cloth/posx.jpg", "textures/cubemaps/manual-cloth/posz.jpg", "textures/cubemaps/manual-leathercloth/negy.jpg", "textures/cubemaps/manual-leathercloth/posx.jpg", "textures/cubemaps/manual-leathercloth/posz.jpg", "textures/cubemaps/auto-leather/negy.jpg", "textures/cubemaps/auto-leather/posx.jpg", "textures/cubemaps/auto-leather/posz.jpg", "textures/cubemaps/auto-cloth/negy.jpg", "textures/cubemaps/auto-cloth/posx.jpg", "textures/cubemaps/auto-cloth/posz.jpg", "textures/cubemaps/auto-leathercloth/negy.jpg", "textures/cubemaps/auto-leathercloth/posx.jpg", "textures/cubemaps/auto-leathercloth/posz.jpg"]
         };
-        THREE.Extensions.get("EXT_shader_texture_lod") ? B.cubemaps = [v.ENV + "/cubemap.bin"] : B.panoramas = [v.ENV + "/panorama.bin"];
+        //THREE.Extensions.get("EXT_shader_texture_lod") ? B.cubemaps = [v.ENV + "/cubemap.bin"] : B.panoramas = [v.ENV + "/panorama.bin"];
         var D = new l(B);
         D.load().then(function(e) {
             h.texturePath = "assets/" + T + "/",

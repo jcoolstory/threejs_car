@@ -1,0 +1,445 @@
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline; }
+
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block; }
+
+body {
+  line-height: 1; }
+
+ol, ul {
+  list-style: none; }
+
+blockquote, q {
+  quotes: none; }
+
+blockquote:before, blockquote:after,
+q:before, q:after {
+  content: '';
+  content: none; }
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0; }
+html,
+body {
+  height: 100%;
+  overflow: hidden; }
+
+* {
+  -webkit-box-sizing: border-box;
+  -ms-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  -o-box-sizing: border-box;
+  box-sizing: border-box; }
+
+.preloading {
+  display: none; }
+
+.loading {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  background: url(../img/splash-bg.jpg) no-repeat center right fixed;
+  -webkit-background-size: cover;
+  -moz-background-size: cover;
+  -o-background-size: cover;
+  background-size: cover; }
+  .loading .inner {
+    display: table;
+    height: 100%;
+    width: 100%;
+    vertical-align: middle;
+    text-align: center; }
+  .loading .main {
+    display: table-cell;
+    vertical-align: middle;
+    text-align: center;
+    font-family: 'Work Sans';
+    font-weight: 500;
+    color: #fff;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale; }
+    .loading .main a {
+      text-decoration: none;
+      color: #fff;
+      border-bottom: 1px solid #fff; }
+      .loading .main a:hover {
+        color: #fffa71;
+        border-color: #fffa71; }
+  .loading .title {
+    font-size: 4.90625rem;
+    font-family: 'Miso';
+    text-transform: uppercase;
+    color: #fffa71;
+    font-weight: bold; }
+  .loading .copy {
+    font-size: 1.40625rem;
+    margin-bottom: 3rem;
+    line-height: 1.75em; }
+    .loading .copy a {
+      text-decoration: none;
+      color: #fff;
+      border-bottom: 1px solid #fff; }
+      .loading .copy a:hover {
+        color: #fff;
+        border-color: #fff; }
+  .loading .main-logo {
+    position: absolute;
+    top: 4em;
+    right: 0;
+    height: 4.05em;
+    width: 13.35em;
+    background: url("../img/renault.png");
+    background-size: 100%; }
+  .loading .content {
+    position: absolute;
+    top: 4em;
+    left: 0;
+    background: rgba(255, 255, 255, 0.9);
+    padding: 3.4em 6em 3.4em 3em;
+    font-family: 'RenaultLife';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale; }
+    .loading .content strong {
+      font-weight: 400; }
+    .loading .content h1 {
+      font-size: 3em;
+      font-weight: 300;
+      line-height: 1.25; }
+    .loading .content h2 {
+      font-size: 2em;
+      font-weight: 700;
+      line-height: 1.5; }
+    .loading .content .intro {
+      font-size: 1.412em;
+      margin-top: 1.5em; }
+    .loading .content .icon-vr {
+      float: left;
+      width: 1.464285714em;
+      height: 0.928571429em;
+      background: url("../img/vr.png");
+      background-size: 100%;
+      margin-right: 0.5em;
+      position: relative;
+      top: 0.08em; }
+    .loading .content .progress,
+    .loading .content .start {
+      text-align: center;
+      width: 50%;
+      font-weight: 700;
+      font-size: 1.212em;
+      text-transform: uppercase;
+      height: 2.557755776em;
+      line-height: 2.557755776em;
+      margin-top: 1.5em; }
+      .loading .content .progress .percentage,
+      .loading .content .start .percentage {
+        margin-left: 0.5em; }
+    .loading .content .start.frozen {
+      background: #fff; }
+    .loading .content .progress {
+      background: none;
+      border: 0.15em solid #000;
+      pointer-events: none;
+      line-height: 2.257755776em; }
+    .loading .content .start {
+      background: #ffcc33;
+      display: none;
+      cursor: pointer;
+      font-weight: 700; }
+      .loading .content .start:hover {
+        background: #ffbf00; }
+  .loading .credits {
+    position: absolute;
+    bottom: 3em;
+    left: 3em;
+    font-family: 'RenaultLife';
+    color: #fff;
+    font-size: 0.8em; }
+    .loading .credits:before, .loading .credits:after {
+      content: " ";
+      display: table; }
+    .loading .credits:after {
+      clear: both; }
+    .loading .credits .text,
+    .loading .credits .logos {
+      float: left;
+      height: 2.66667em; }
+    .loading .credits .logos {
+      padding-left: 1.333em; }
+      .loading .credits .logos:before, .loading .credits .logos:after {
+        content: " ";
+        display: table; }
+      .loading .credits .logos:after {
+        clear: both; }
+    .loading .credits .text {
+      line-height: 1.5;
+      border-right: 0.133333333em solid #ffcc33;
+      padding-right: 3.1em; }
+      .loading .credits .text a {
+        color: #fff;
+        text-decoration: none;
+        border-bottom: 1px solid #fff;
+        margin-left: 0.3em; }
+        .loading .credits .text a:hover {
+          color: #ffcc33;
+          border-color: #ffcc33; }
+    .loading .credits .logo {
+      height: 2.66667em;
+      width: 11.066666667em;
+      background-size: auto 200%;
+      background-position: 0 0;
+      float: left; }
+      .loading .credits .logo:hover {
+        background-position: 0 -100%; }
+      .loading .credits .logo.lw {
+        background-image: url("../img/lw.png"); }
+      .loading .credits .logo.renault {
+        background-image: url("../img/renault-inline.png"); }
+      .loading .credits .logo.oculus {
+        background-image: url("../img/oculus.png"); }
+      .loading .credits .logo a {
+        height: 100%;
+        width: 100%;
+        display: block; }
+  .loading .sharing {
+    font-family: 'RenaultLife';
+    position: absolute;
+    bottom: 3em;
+    right: 3em;
+    height: 1.95em;
+    background-size: 100%;
+    text-transform: uppercase;
+    color: #fff; }
+    .loading .sharing:before, .loading .sharing:after {
+      content: " ";
+      display: table; }
+    .loading .sharing:after {
+      clear: both; }
+    .loading .sharing .text {
+      font-size: 0.875em;
+      margin-right: 1em;
+      text-align: right;
+      line-height: 1.066666667;
+      font-weight: 700; }
+    .loading .sharing .text,
+    .loading .sharing .buttons {
+      float: left; }
+    .loading .sharing .buttons div {
+      float: left;
+      height: 1.95em;
+      width: 1.95em;
+      background-position: 0 0;
+      background-size: 100% 200%;
+      cursor: pointer; }
+      .loading .sharing .buttons div + div {
+        margin-left: 0.75em; }
+      .loading .sharing .buttons div:hover {
+        background-position: 0 -100%; }
+      .loading .sharing .buttons div.twitter {
+        background-image: url("../img/twitter.png"); }
+      .loading .sharing .buttons div.facebook {
+        background-image: url("../img/facebook.png"); }
+  .loading .warning {
+    font-weight: 700;
+    margin-top: 1em;
+    color: red;
+    display: none;
+    font-size: 1.25em; }
+    .loading .warning a {
+      color: #000; }
+    .loading .warning a:hover {
+      color: red;
+      border-color: red; }
+  .loading .mobile .topbar {
+    background: #fff;
+    height: 64px;
+    position: relative;
+    font-family: 'RenaultLife';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    padding: 14px 0 0 14px;
+    -webkit-box-shadow: 3px 0 5px rgba(0, 0, 0, 0.5);
+    -moz-box-shadow: 3px 0 5px rgba(0, 0, 0, 0.5);
+    -ms-box-shadow: 3px 0 5px rgba(0, 0, 0, 0.5);
+    -o-box-shadow: 3px 0 5px rgba(0, 0, 0, 0.5);
+    box-shadow: 3px 0 5px rgba(0, 0, 0, 0.5);
+    z-index: 10; }
+    .loading .mobile .topbar:before, .loading .mobile .topbar:after {
+      content: " ";
+      display: table; }
+    .loading .mobile .topbar:after {
+      clear: both; }
+    .loading .mobile .topbar strong {
+      font-weight: 400; }
+    .loading .mobile .topbar h1 {
+      font-size: 2.5em;
+      font-weight: 300;
+      line-height: 1.6;
+      float: left; }
+  .loading .mobile .mobile-logo {
+    height: 35px;
+    width: 55px;
+    background: url("../img/mobile-logo.png") no-repeat;
+    background-size: 100%;
+    float: right; }
+  .loading .mobile .content {
+    top: 64px;
+    left: 10%;
+    width: 80%;
+    padding: 2em;
+    font-size: 12px; }
+    .loading .mobile .content .intro {
+      margin-top: 0;
+      line-height: 1.5; }
+  .loading .mobile .start,
+  .loading .mobile .progress {
+    width: 100%;
+    height: 3em;
+    line-height: 3em; }
+  .loading .mobile .progress {
+    line-height: 2.7em; }
+
+@media screen and (min-width: 2100px) {
+  html {
+    font-size: 21px; } }
+
+@media screen and (max-width: 2000px) {
+  html {
+    font-size: 20px; } }
+
+@media screen and (max-width: 1900px) {
+  html {
+    font-size: 19px; } }
+
+@media screen and (max-width: 1800px) {
+  html {
+    font-size: 18px; } }
+
+@media screen and (max-width: 1700px) {
+  html {
+    font-size: 17px; } }
+
+@media screen and (max-width: 1500px) {
+  html {
+    font-size: 16px; } }
+
+@media screen and (max-width: 1400px) {
+  html {
+    font-size: 15px; } }
+
+@media screen and (max-width: 1300px) {
+  html {
+    font-size: 14px; } }
+
+@media screen and (max-width: 1200px) {
+  html {
+    font-size: 13px; } }
+
+@media screen and (max-width: 1100px) {
+  html {
+    font-size: 12px; } }
+
+@media screen and (max-width: 1000px) {
+  html {
+    font-size: 11px; } }
+
+@media screen and (max-width: 900px) {
+  html {
+    font-size: 10px; } }
+
+@media screen and (max-width: 800px) {
+  html {
+    font-size: 9px; } }
+
+@media screen and (min-width: 651px) {
+  .desktop {
+    display: block; }
+  .mobile {
+    display: none; } }
+
+@media screen and (max-width: 650px) {
+  .desktop {
+    display: none; }
+  .mobile {
+    display: block; }
+  .loading {
+    background: url(../img/splash-bg-mobile.jpg) no-repeat top center fixed;
+    background-size: cover; } }
+
+#resume {
+  display: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  text-align: center;
+  color: #fff;
+  font-family: 'RenaultLife';
+  vertical-align: middle;
+  z-index: 100;
+  font-size: 1.412em;
+  background: rgba(0, 0, 0, 0.5); }
+  #resume .inner {
+    height: 100%;
+    width: 100%;
+    display: table;
+    vertical-align: middle; }
+    #resume .inner div {
+      display: table-cell;
+      vertical-align: middle; }
+
+.paused {
+  background: #000; }
+  .paused canvas {
+    -webkit-filter: blur(20px);
+    -ms-filter: blur(20px);
+    -moz-filter: blur(20px);
+    -o-filter: blur(20px);
+    filter: blur(20px); }
+  .paused #resume {
+    display: block; }
+
+.hovering {
+  cursor: pointer; }
+
+body:not(.hovering) canvas {
+  cursor: move;
+  cursor: grab;
+  cursor: -ms-grab;
+  cursor: -moz-grab;
+  cursor: -webkit-grab; }
+  body:not(.hovering) canvas:active {
+    cursor: move;
+    cursor: grabbing;
+    cursor: -ms-grabbing;
+    cursor: -moz-grabbing;
+    cursor: -webkit-grabbing; }
+
+* {
+  -webkit-tap-highlight-color: transparent; }
