@@ -139,7 +139,7 @@ function createModels() {
     groundTexture.wrapT = THREE.RepeatWrapping;
     groundTexture.repeat.set( 4, 4 );
     var groundGeo = new THREE.PlaneGeometry( 40, 40,1,1 );
-    groundMat = new THREE.MeshPhongMaterial({ color:0xaaaaaa, map: groundTexture});
+    groundMat = new THREE.MeshPhongMaterial({ color:0xffffff});
     groundMat.envMap = textureCubeBlur;
     groundMat.reflectivity  = 0.3;
 
@@ -147,7 +147,7 @@ function createModels() {
     var ground = new THREE.Mesh( groundGeo, groundMat );
     ground.rotation.x = -Math.PI/2;
     ground.position.y = 0;
-    scene.add(ground);
+    // scene.add(ground);
 
     var shadowTexture =  new THREE.TextureLoader().load("../res/car_shadow.png");
     var shadowGeometry = new THREE.PlaneBufferGeometry( 7, 4 );
@@ -163,11 +163,12 @@ function createModels() {
     domTexture.wrapS = THREE.RepeatWrapping;
     domTexture.wrapT = THREE.RepeatWrapping;
     domTexture.repeat.set( 4, 4 );
-    domeMaterial = new THREE.MeshPhongMaterial( { color:0xeeeeef , side: THREE.BackSide, map:groundTexture } );
-    domeMaterial.envMap = textureCubeBlur;
-    domeMaterial.reflectivity = 0.6;
+    domeMaterial = new THREE.MeshPhongMaterial( { color:0xffffff , side: THREE.BackSide } );
+    // domeMaterial.envMap = textureCubeBlur;
+    // domeMaterial.reflectivity = 0.1;
 
-    var dome = new THREE.Mesh( new THREE.CylinderBufferGeometry( 15, 15, 20,16 ), domeMaterial );
+    var dome = new THREE.Mesh( new THREE.CylinderBufferGeometry( 15, 15, 20,32 ), domeMaterial );
+    dome.position.y = 10;
     // var dome = new THREE.Mesh( new THREE.BoxBufferGeometry( 30, 30, 30 ), domeMaterial );
     scene.add( dome );
 
