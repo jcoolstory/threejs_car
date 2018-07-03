@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset=utf-8>
+		<title>Car Configurator</title>
+		<style>
+			body{margin: 0;}
+			canvas{width: 100%; height: 100%}
+			button{border:0}
+			#controls{position: absolute; text-align:left; bottom:0; left:0; box-sizing:border-box; padding: 15px; width:100%; background: rgba(0, 0, 0, 0.5); border: 1px solid #aaa;}
+			#controls.close{padding:0}
+			.progress{position:fixed; width:100%; height:100%; font-size:25px; text-align:center; background:#d5cbb4}
+			button.carColor{width:50px; height:50px; margin-right:5px}
+			button.car1{background:#7f7f7f}
+			button.car2{background:#027f11}
+			button.car3{background:#00117f}
+			button.car4{background:#7f0064}
+			button.car5{background:#7f0500}
+			button.interior1{background-image:url('./img/bg_sheet1.jpg')}
+			button.interior2{background-image:url('./img/bg_sheet2.jpg')}
+			button.interior3{background-image:url('./img/bg_sheet3.jpg')}
+			.rightAbsolute{position:fixed; bottom:95px; right:10px}
+
+			button.btnView{width:64px; height:64px; background:url("./img/ico_opend.png") no-repeat 0 0}
+			button.btnView.close{background:url("./img/ico_closed.png") no-repeat 0 0}
+			button.btnRotate{width:64px; height:64px; background:url("./img/ico_stop.png") no-repeat 0 0}
+			button.btnRotate.stop{background:url("./img/ico_rotate.png") no-repeat 0 0}
+			button.btnGear{width:64px; height:64px; background:url("./img/ico_gear2.png") no-repeat 0 0}
+			button.btnGear.stick{background:url("./img/ico_gear1.png") no-repeat 0 0}
+			[v-cloak] { display: none; }
+		</style>
+	</head>
+	<body>
+		<script src="../../js/three.js"></script>
+		<script src="../../js/OrbitControls.js"></script>
+		<script src="../../js/exjs/loaders/OBJLoader.js"></script>
+		<script src="../../js/exjs/loaders/MTLLoader.js"></script>
+		<script src="../../js/exjs/lights/RectAreaLightUniformsLib.js"></script>
+		<script src="../../js/vue/vue.min.js"></script>
+		<div id="wrap"  >
+		<div class="progress" id="progressbar" v-if="!load">
+			<h1> Loading... </h1>
+			<h4 v-cloak>{{ progressText }} %</h4>
+		</div>
+		<div id="controls" v-if="load" v-cloak>
+			<div id="group">
+				 <div align="center" v-if="statusView"> 
+					<button type="button" @click="colorChange('7f7f7f')" class="carColor car1"></button> 
+					<button type="button" @click="colorChange('027f11')" class="carColor car2"></button> 
+					<button type="button" @click="colorChange('00117f')" class="carColor car3"></button> 
+					<button type="button" @click="colorChange('7f0064')" class="carColor car4"></button> 
+					<button type="button" @click="colorChange('7f0500')" class="carColor car5"></button> 
+					<!-- <input type="color" id="color" v-on:change="colorChange(this)" v-model="bodyColor"/> -->
+				</div>
+				<div align="center" v-else>
+					<button type="button" @click="interiorChange('cloth')" class="carColor interior1"></button>
+					<button type="button" @click="interiorChange('leather')" class="carColor interior2"></button>
+					<button type="button" @click="interiorChange('leathercloth')" class="carColor interior3"></button>
+				</div>
+				<div class="rightAbsolute">
+					<div><button v-on:click="toggleinner"  id="toggleButton" class="btnView" :class="statusView ? '' : 'close'"> </button></div> 
+					<div>
+						<button v-on:click="toggleRotate" id="toggleRotate" class="btnRotate" v-if="statusView" :class="statusRotate ? '' : 'stop'"> </button>
+						<button v-on:click="toggleGear" id="toggleGear" class="btnGear" v-else :class="statusGear == 'auto' ? 'auto' : 'stick'"> </button>
+					</div>
+				</div>
+			</div>
+		</div>
+		</div>
+		<script src="./build.js"></script>
+	</body>
+</html>
