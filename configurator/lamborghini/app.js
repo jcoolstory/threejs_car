@@ -1,12 +1,16 @@
 import vue from "vue";
-var scene , camera , renderer, labelRX, labelRY , offsetX ,offsetY;
-var mainModel, bodyMaterial, raycaster, cursor , interiorMaterial, shadow , theta=0 ,controls
-var radius =15, theta = 0 , enableInner = false , press = false , loading = true , manager;
-var animations = [];
-var mouse = new THREE.Vector2(), INTERSECTED;
-var rightDoor = {name:"Mesh74_032Gruppe_12_1_032Group1_032Lamborghini_Aventador1_032Model", opened:false};
-var leftDoor = {name:"Mesh204_032Gruppe_12_2_032Group1_032Lamborghini_Aventador1_032Model", opened:false};
-var doorModels = [rightDoor, leftDoor];
+
+// controller
+var scene, camera , renderer, offsetX ,offsetY, manager,
+    animations = [],
+    mouse = new THREE.Vector2();
+    
+
+// materials
+var bodyMaterial, interiorMaterial, glassMaterial, shadow , controls,envCubemap
+
+// flags
+var enableInner = false , press = false , loading = true ;
 
 init();
 animate();
@@ -42,19 +46,52 @@ function init() {
     document.addEventListener("mouseup", onMouseUp);
     window.addEventListener( 'resize', onWindowResize, false );
     document.addEventListener("click",onMouseClick);
-    
-    labelRX = document.getElementById("rotateX"); 
-    labelRY = document.getElementById("rotateY");
 
     scene.add( camera );
 
     createModels();
     createLight();
 
-    raycaster = new THREE.Raycaster();
+    // raycaster = new THREE.Raycaster();
 }
 
 function createModels() {
+    
+    createCar();
+    createShadow();
+    createBackground();
+}
+
+function carTraverse(child) {
+    if (child.material) {
+        if ( child.material.name === "Body") {
+            if (bodyMaterial == undefined) {
+
+                bodyMaterial = child.material;
+                bodyMaterial.envMap = envCubemap;
+                bodyMaterial.reflectivity = 0.3;
+                bodyMaterial.emissive = new THREE.Color(0.1,0.1,0.1);
+                vueApp.bodyColor = "#" + bodyMaterial.color.getHexString();
+            }
+            child.material = bodyMaterial;
+        } else if (child.material.name == "interior") {
+            if (interiorMaterial == undefined) {
+                interiorMaterial = new THREE.MeshLambertMaterial({color:0x333333});
+            }
+            child.material =interiorMaterial;
+        } else  if (child.material.name == "Glass") {
+            if (glassMaterial == undefined) {
+                glassMaterial = child.material;
+                glassMaterial.color = new THREE.Color(0.3,0.3,0.3);
+                glassMaterial.envMap = envCubemap;
+                glassMaterial.reflectivity = 1;
+                glassMaterial.opacity = 0.5; 
+            }
+        }
+    }
+}
+
+function createCar() {
     manager = new THREE.LoadingManager();
     manager.onLoad = ( f => { loading = false } );
     manager.onLoad= (f=> {
@@ -67,16 +104,7 @@ function createModels() {
         path + "pz.jpg", path + "nz.jpg"
     ];
 
-    var textureCube = new THREE.CubeTextureLoader().load( urls );
-
-    var path2 = "../../res/textures/cube/reflectIndoor-blur/";
-    var urls2 = [
-        path2 + "px.jpg", path2 + "nx.jpg",
-        path2 + "py.jpg", path2 + "ny.jpg",
-        path2 + "pz.jpg", path2 + "nz.jpg"
-    ];
-
-    var textureCubeBlur = new THREE.CubeTextureLoader().load(urls2);
+    envCubemap = new THREE.CubeTextureLoader().load( urls );
 
     var onError = function (xhr ) {
     };    
@@ -89,53 +117,14 @@ function createModels() {
             .setMaterials( materials )
             .setPath( '../res/Aventador/' )            
             .load( 'Avent.obj', function ( object ) {
-                object.traverse ( function ( child ) { 
-                    
-                    if (child.material) {
-                        if ( child.material.name === "Body") {
-                            if (bodyMaterial == undefined) {
-
-                                bodyMaterial = child.material;
-                                bodyMaterial.envMap = textureCube;
-                                bodyMaterial.reflectivity = 0.3;
-                                bodyMaterial.emissive = new THREE.Color(0.1,0.1,0.1);
-                                vueApp.bodyColor = "#" + bodyMaterial.color.getHexString();
-                            }
-                            child.material = bodyMaterial;
-                        } else if (child.material.name == "interior") {
-                            if (interiorMaterial == undefined) {
-                                interiorMaterial = new THREE.MeshLambertMaterial({color:0x333333});
-                            }
-                            child.material =interiorMaterial;
-                        } else  if (child.material.name == "Glass") {
-                            child.material.color = new THREE.Color(0.3,0.3,0.3);
-                            child.material.envMap = textureCube;
-                            child.material.reflectivity = 1;
-                            child.material.opacity = 0.5; 
-                        }
-                    }
-                });
-                mainModel = object;
+                object.traverse(carTraverse);
                 scene.add( object );
                 shadow.visible = true;
             }, vueApp.onProgress, onError );
     } );
-    
-    ///
-    /// showroomt을 white color 변경시 필요없음
-    /// 
-    // // // create ground    
-    // var groundTexture =  new THREE.TextureLoader().load("../../res/textures/ground/TARMAC2.jpg");
-    // groundTexture.wrapS = THREE.RepeatWrapping;
-    // groundTexture.wrapT = THREE.RepeatWrapping;
-    // groundTexture.repeat.set( 4, 4 );
-    // var groundGeo = new THREE.PlaneGeometry( 40, 40,1,1 );
-    // var groundMat = new THREE.MeshBasicMaterial({ color:0x555555, map:groundTexture});
+}
 
-    // var ground = new THREE.Mesh( groundGeo, groundMat );
-    // ground.rotation.x = -Math.PI/2;
-    // ground.position.y = 0;
-    // scene.add(ground);
+function createShadow() {
 
     var shadowTexture =  new THREE.TextureLoader().load("../res/car_shadow.png");
     var shadowGeometry = new THREE.PlaneBufferGeometry( 7, 4 );
@@ -145,7 +134,19 @@ function createModels() {
     shadow.position.y = 0.01;
     shadow.visible = false;
     scene.add(shadow);
+}
 
+function createBackground() {   
+
+    var path2 = "../../res/textures/cube/reflectIndoor-blur/";
+    var urls2 = [
+        path2 + "px.jpg", path2 + "nx.jpg",
+        path2 + "py.jpg", path2 + "ny.jpg",
+        path2 + "pz.jpg", path2 + "nz.jpg"
+    ];
+
+    var textureCubeBlur = new THREE.CubeTextureLoader().load(urls2);
+    
     // // create dome or cylinder
     var domTexture =   new THREE.TextureLoader().load("../../res/textures/ground/pattern.png");
     domTexture.wrapS = THREE.RepeatWrapping;
@@ -157,10 +158,9 @@ function createModels() {
 
     var dome = new THREE.Mesh( new THREE.CylinderBufferGeometry( 15, 15, 20,32 ), domeMaterial );
     dome.position.y = 10;
-    // var dome = new THREE.Mesh( new THREE.SphereBufferGeometry( 20, 20, 10 ), domeMaterial );
-    // var dome = new THREE.Mesh( new THREE.BoxBufferGeometry( 30, 30, 30 ), domeMaterial );
     scene.add( dome );
 }
+
 
 function createLight(){
     
@@ -248,7 +248,6 @@ function animate(time) {
 }
 
 function StopWatch(dur, start, to){
-    var startTime = +Date.now();
     var currentTime = 0;
     var range = to-start;
     var lastTime =+Date.now()/1000;
