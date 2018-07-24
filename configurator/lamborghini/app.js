@@ -29,6 +29,7 @@ function init() {
     scene = new THREE.Scene();
     renderer = new THREE.WebGLRenderer({antialias:false});
     renderer.setSize( window.innerWidth, window.innerHeight );
+    renderer.toneMapping = THREE.NoToneMapping;
     
     document.body.appendChild( renderer.domElement );
     
@@ -74,6 +75,7 @@ function carTraverse(child) {
                 bodyMaterial.envMap = envCubemap;
                 bodyMaterial.reflectivity = 0.3;
                 bodyMaterial.emissive = new THREE.Color(0.1,0.1,0.1);
+                bodyMaterial.needsUpdate = true;
                 vueApp.bodyColor = "#" + bodyMaterial.color.getHexString();
             }
             child.material = bodyMaterial;
@@ -316,6 +318,7 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
     renderer.setSize( window.innerWidth, window.innerHeight );
 }
+console.log(renderer);
 
 var vueApp = new vue({
     el : "#wrap",
@@ -325,16 +328,32 @@ var vueApp = new vue({
             bodyColor : 0x4b0300,
             statusView : "Inner View",
             statusRotate : "Stop",
-            progressValue : 0
+            progressValue : 0,
+            renderer : renderer,
+            tonemappings : [
+                { text: "NoToneMapping", value:THREE.NoToneMapping },
+				{ text: "LinearToneMapping", value:THREE.LinearToneMapping },
+				{ text: "ReinhardToneMappiong", value:THREE.ReinhardToneMapping },
+				{ text: "Uncarted2 " , value : THREE.Uncharted2ToneMapping },
+                { text: "Cineon", value : THREE.CineonToneMapping }
+            ],
+            selectmapping :undefined,
         }
     },
     computed :{
         progressText() {
             return this.progressValue.toFixed(0);
         }
+        
     },
     methods : {
         
+        changedTonemapping1() {
+            renderer.toneMapping = this.selectmapping;
+            bodyMaterial.needsUpdate = true;
+            console.log("changedTonemapping" , this.tonemappings[this.selectmapping]);
+            
+        },
         // MATERIALS
         onProgress  ( xhr) {
             if ( xhr.lengthComputable) {

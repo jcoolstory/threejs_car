@@ -329,6 +329,7 @@ function init() {
     scene = new THREE.Scene();
     renderer = new THREE.WebGLRenderer({ antialias: false });
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.toneMapping = THREE.NoToneMapping;
 
     document.body.appendChild(renderer.domElement);
 
@@ -373,6 +374,7 @@ function carTraverse(child) {
                 bodyMaterial.envMap = envCubemap;
                 bodyMaterial.reflectivity = 0.3;
                 bodyMaterial.emissive = new THREE.Color(0.1, 0.1, 0.1);
+                bodyMaterial.needsUpdate = true;
                 vueApp.bodyColor = "#" + bodyMaterial.color.getHexString();
             }
             child.material = bodyMaterial;
@@ -387,7 +389,7 @@ function carTraverse(child) {
                 glassMaterial.color = new THREE.Color(0.3, 0.3, 0.3);
                 glassMaterial.envMap = envCubemap;
                 glassMaterial.reflectivity = 1;
-                // glassMaterial.opacity = 0.5; 
+                glassMaterial.opacity = 0.5;
             }
         }
     }
@@ -454,10 +456,10 @@ function createBackground() {
     /// showroomt을 white color 변경시 필요없음
     /// 
     // // create ground    
-    var groundTexture = new THREE.TextureLoader().load("../../res/textures/ground/TARMAC2.jpg");
-    groundTexture.wrapS = THREE.RepeatWrapping;
-    groundTexture.wrapT = THREE.RepeatWrapping;
-    groundTexture.repeat.set(4, 4);
+    // var groundTexture =  new THREE.TextureLoader().load("../../res/textures/ground/TARMAC2.jpg");
+    // groundTexture.wrapS = THREE.RepeatWrapping;
+    // groundTexture.wrapT = THREE.RepeatWrapping;
+    // groundTexture.repeat.set( 4, 4 );
     var groundGeo = new THREE.PlaneGeometry(4000, 4000, 1, 1);
     var groundMat = new THREE.MeshPhongMaterial({ shininess: 0.1 });
 
@@ -594,6 +596,7 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
+console.log(renderer);
 
 var vueApp = new _vue2.default({
     el: "#wrap",
@@ -603,7 +606,10 @@ var vueApp = new _vue2.default({
             bodyColor: 0x4b0300,
             statusView: "Inner View",
             statusRotate: "Stop",
-            progressValue: 0
+            progressValue: 0,
+            renderer: renderer,
+            tonemappings: [{ text: "NoToneMapping", value: THREE.NoToneMapping }, { text: "LinearToneMapping", value: THREE.LinearToneMapping }, { text: "ReinhardToneMappiong", value: THREE.ReinhardToneMapping }, { text: "Uncarted2 ", value: THREE.Uncharted2ToneMapping }, { text: "Cineon", value: THREE.CineonToneMapping }],
+            selectmapping: undefined
         };
     },
     computed: {
@@ -612,6 +618,11 @@ var vueApp = new _vue2.default({
         }
     },
     methods: {
+        changedTonemapping1: function changedTonemapping1() {
+            renderer.toneMapping = this.selectmapping;
+            bodyMaterial.needsUpdate = true;
+            console.log("changedTonemapping", this.tonemappings[this.selectmapping]);
+        },
 
         // MATERIALS
         onProgress: function onProgress(xhr) {
