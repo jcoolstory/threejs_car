@@ -7,7 +7,7 @@ var scene, camera , renderer, offsetX ,offsetY, manager,
     
 
 // materials
-var bodyMaterial, interiorMaterial, glassMaterial, shadow , controls,envCubemap
+var bodyMaterial, interiorMaterial, glassMaterial, shadow , controls,envCubemap ,envCubemapBlur
 
 // flags
 var enableInner = false , press = false , loading = true ;
@@ -51,15 +51,18 @@ function init() {
 
     createModels();
     createLight();
-
+    scene.background = new THREE.Color(0xaaaaaa);
+    // scene.background = envCubemapBlur;
+    // scene.background = envCubemap;
     // raycaster = new THREE.Raycaster();
 }
 
 function createModels() {
     
+    createBackground();
     createCar();
     createShadow();
-    createBackground();
+    
 }
 
 function carTraverse(child) {
@@ -75,10 +78,10 @@ function carTraverse(child) {
             }
             child.material = bodyMaterial;
         } else if (child.material.name == "interior") {
-            if (interiorMaterial == undefined) {
-                interiorMaterial = new THREE.MeshLambertMaterial({color:0x333333});
-            }
-            child.material =interiorMaterial;
+            // if (interiorMaterial == undefined) {
+            //     interiorMaterial = new THREE.MeshLambertMaterial({color:0x333333});
+            // }
+            // child.material =interiorMaterial;
         } else  if (child.material.name == "Glass") {
             if (glassMaterial == undefined) {
                 glassMaterial = child.material;
@@ -131,7 +134,7 @@ function createShadow() {
     var shadowMet = new THREE.MeshBasicMaterial( { color: 0xaaaaaa , map: shadowTexture, transparent:true} );
     shadow = new THREE.Mesh( shadowGeometry, shadowMet );
     shadow.rotation.x = -Math.PI/2;
-    shadow.position.y = 0.01;
+    shadow.position.y = 0.02;
     shadow.visible = false;
     scene.add(shadow);
 }
@@ -146,7 +149,7 @@ function createBackground() {
     ];
 
     var textureCubeBlur = new THREE.CubeTextureLoader().load(urls2);
-    
+    envCubemapBlur = textureCubeBlur;
     // // create dome or cylinder
     var domTexture =   new THREE.TextureLoader().load("../../res/textures/ground/pattern.png");
     domTexture.wrapS = THREE.RepeatWrapping;
@@ -154,11 +157,28 @@ function createBackground() {
     domTexture.repeat.set( 4, 4 );
     var domeMaterial = new THREE.MeshBasicMaterial( { color:0xffffff , side: THREE.BackSide } );
     domeMaterial.envMap = textureCubeBlur;
-    domeMaterial.reflectivity = 0.2;
+    domeMaterial.reflectivity = 1;
 
-    var dome = new THREE.Mesh( new THREE.CylinderBufferGeometry( 15, 15, 20,32 ), domeMaterial );
-    dome.position.y = 10;
-    scene.add( dome );
+    var dome = new THREE.Mesh( new THREE.CylinderBufferGeometry( 150, 150, 20,32 ), domeMaterial );
+    // dome.position.y = 10;
+    // scene.add( dome );
+
+    ///
+    /// showroomt을 white color 변경시 필요없음
+    /// 
+    // // create ground    
+    // var groundTexture =  new THREE.TextureLoader().load("../../res/textures/ground/TARMAC2.jpg");
+    // groundTexture.wrapS = THREE.RepeatWrapping;
+    // groundTexture.wrapT = THREE.RepeatWrapping;
+    // groundTexture.repeat.set( 4, 4 );
+    var groundGeo = new THREE.PlaneGeometry( 4000, 4000,1,1 );
+    var groundMat = new THREE.MeshPhongMaterial({ shininess:0.1});
+
+    var ground = new THREE.Mesh( groundGeo, groundMat );
+    ground.rotation.x = -Math.PI/2;
+    ground.position.y = 0;
+    scene.add(ground);
+    scene.fog = new THREE.Fog( 0xaaaaaa, 10, 50 );
 }
 
 
