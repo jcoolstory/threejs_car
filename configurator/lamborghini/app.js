@@ -73,9 +73,12 @@ function carTraverse(child) {
 
                 bodyMaterial = child.material;
                 bodyMaterial.envMap = envCubemap;
-                bodyMaterial.reflectivity = 0.3;
-                bodyMaterial.emissive = new THREE.Color(0.1,0.1,0.1);
-                bodyMaterial.needsUpdate = true;
+                // bodyMaterial.reflectivity = 0.3;
+                // bodyMaterial.emissive = new THREE.Color(0.1,0.1,0.1);
+
+                bodyMaterial.reflectivity = 0.6;
+                bodyMaterial.shininess = 0.1;
+
                 vueApp.bodyColor = "#" + bodyMaterial.color.getHexString();
             }
             child.material = bodyMaterial;
@@ -102,7 +105,7 @@ function createCar() {
     manager.onLoad= (f=> {
         loading = false;
     })
-    var path = "../../res/textures/cube/reflectIndoor/";
+    var path = "../../res/textures/cube/reflectGray/";
     var urls = [
         path + "px.jpg", path + "nx.jpg",
         path + "py.jpg", path + "ny.jpg",
@@ -186,7 +189,7 @@ function createBackground() {
 
 function createLight(){
     
-    var hemisphereLight = new THREE.HemisphereLight( 0x111111, 0xffffff )     
+    var hemisphereLight = new THREE.HemisphereLight( 0x111111, 0x666655 )     
     var ambientLight = new THREE.AmbientLight( 0x333333,0.6 );
     var pointLight = new THREE.PointLight( 0xeeeeee, 1);
     var directLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -201,7 +204,6 @@ function createLight(){
     // camera.add(directLight);
     scene.add(hemisphereLight);
     scene.add(pointLight);
-    // camera.add(directLight);
     scene.add( ambientLight );
 }
 
