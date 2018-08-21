@@ -285,7 +285,7 @@ function update(time){
     if (mainCarmodel) {
         let current = -(accel > 0.01 ? accel : 0);
         //mainCarmodel.position.z += current;
-        //camera.lookAt(mainCarmodel.position);
+        camera.lookAt(mainCarmodel.position);
         
         mainCarmodel.rotation.y += rotationVelo;
         let x = Math.sin(mainCarmodel.rotation.y) * current;
@@ -300,7 +300,7 @@ function update(time){
 
         if ( Math.abs(rotationVelo) > 0.001)
             rotationVelo *= 0.95;
-        controls.update();
+        // controls.update();
     }
 }
 
@@ -311,25 +311,25 @@ function animate(time) {
     //     return
     update(time);
 
-    if (animations.length){
+    // if (animations.length){
         
-        var result = animations[0](time)
-        if (result== undefined){
-            animations.length = 0;
-            camera.rotation.x = toRadian(-90);
-            camera.rotation.y = toRadian(90);
-            camera.rotation.z = toRadian(90);
-        }
-        else {
-            camera.position.x = animations[0](time);
-            camera.position.y = animations[1](time);
-            camera.position.z = animations[2](time);
-            camera.lookAt(scene.position);
-        }
-    }
-    if (enableInner == false) {
-        controls.update();
-    }
+    //     var result = animations[0](time)
+    //     if (result== undefined){
+    //         animations.length = 0;
+    //         camera.rotation.x = toRadian(-90);
+    //         camera.rotation.y = toRadian(90);
+    //         camera.rotation.z = toRadian(90);
+    //     }
+    //     else {
+    //         camera.position.x = animations[0](time);
+    //         camera.position.y = animations[1](time);
+    //         camera.position.z = animations[2](time);
+    //         camera.lookAt(scene.position);
+    //     }
+    // }
+    // if (enableInner == false) {
+    //     controls.update();
+    // }
     
     renderer.render( scene, camera );
 }
