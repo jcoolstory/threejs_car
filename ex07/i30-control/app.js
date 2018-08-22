@@ -45,6 +45,8 @@ function init() {
     document.addEventListener("mousedown", onMouseDown)
     document.addEventListener("mouseup", onMouseUp);
     document.addEventListener("keypress", onKeyPress);
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("keyup", onKeyUp);
     window.addEventListener( 'resize', onWindowResize, false );
     document.addEventListener("click",onMouseClick);
 
@@ -59,15 +61,24 @@ function init() {
 }
 
 function onKeyPress(evt) {
+    console.log("onKeyPress : " ,evt.key, ":", evt.keyCode)
     if (evt.key === 'w')
         accel += 0.1;
     else if (evt.key === "s")
         accel -= 0.1;
     else if (evt.key === "a") 
-        rotationVelo += 0.01;
+        rotationVelo += 0.005;
     else if (evt.key === "d")
-        rotationVelo -= 0.01;
+        rotationVelo -= 0.005;
 
+}
+
+function onKeyDown(evt) {
+    console.log("onKeyDown : " ,evt.key , ":", evt.keyCode)
+}
+
+function onKeyUp(evt) {
+    console.log("onKeyUp : " ,evt.key, ":", evt.keyCode)
 }
 
 function createModels() {
@@ -206,27 +217,31 @@ function createBackground() {
     /// showroomt을 white color 변경시 필요없음
     /// 
     // // create ground    
-    // var groundTexture =  new THREE.TextureLoader().load("../../res/textures/ground/TARMAC2.jpg");
-    // groundTexture.wrapS = THREE.RepeatWrapping;
-    // groundTexture.wrapT = THREE.RepeatWrapping;
-    // groundTexture.repeat.set( 4, 4 );
+    var groundTexture =  new THREE.TextureLoader().load("../../res/textures/ground/b_liftue.png");
+    groundTexture.wrapS = THREE.RepeatWrapping;
+    groundTexture.wrapT = THREE.RepeatWrapping;
+    groundTexture.repeat.set( 40, 40 );
     var groundGeo = new THREE.PlaneGeometry( 4000, 4000,1,1 );
-    var groundMat = new THREE.MeshPhongMaterial({ color:0xeeeeee, shininess:4000.1});
+    var groundMat = new THREE.MeshLambertMaterial({ color:0xeeeeee, shininess:0, map: groundTexture});
 
     var ground = new THREE.Mesh( groundGeo, groundMat );
     ground.rotation.x = -Math.PI/2;
     ground.position.y = 0;
     scene.add(ground);
     // scene.fog = new THREE.Fog( 0xaaaaaa, 50, 100 );
+
+    var helper = new THREE.GridHelper( 5000, 50 );
+    helper.material.transparent = false;
+    scene.add(helper);
 }
 
 
 function createLight(){
     
     var hemisphereLight = new THREE.HemisphereLight( 0x111111, 0xffffff )     
-    var ambientLight = new THREE.AmbientLight( 0x333333,0.6 );
+    var ambientLight = new THREE.AmbientLight( 0xffffff,0.6 );
     var pointLight = new THREE.PointLight( 0xeeeeee, 1);
-    var directLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    var directLight = new THREE.DirectionalLight(0xffffff, 0.8);
 
     directLight.position.x = 5;
     directLight.position.y = 5;
@@ -236,9 +251,9 @@ function createLight(){
     pointLight.position.y = 15;
     pointLight.position.z = 0;
     // camera.add(directLight);
-    // scene.add(hemisphereLight);
-    scene.add(pointLight);
-    camera.add(directLight);
+    scene.add(hemisphereLight);
+    //scene.add(pointLight);
+    
     scene.add( ambientLight );
 }
 
@@ -285,9 +300,10 @@ function update(time){
     if (mainCarmodel) {
         let current = -(accel > 0.01 ? accel : 0);
         //mainCarmodel.position.z += current;
-        camera.lookAt(mainCarmodel.position);
-        
-        mainCarmodel.rotation.y += rotationVelo;
+        if (rotationVelo > 0.05)
+            rotationVelo = 0.05;
+        if ( Math.abs(current) > 0.0)
+            mainCarmodel.rotation.y += rotationVelo;
         let x = Math.sin(mainCarmodel.rotation.y) * current;
         let z = Math.cos(mainCarmodel.rotation.y) * current;
 
@@ -300,7 +316,16 @@ function update(time){
 
         if ( Math.abs(rotationVelo) > 0.001)
             rotationVelo *= 0.95;
+        else
+            rotationVelo = 0;
         // controls.update();
+
+        x = Math.sin(mainCarmodel.rotation.y) * 55;
+        z = Math.cos(mainCarmodel.rotation.y) * 55;
+        camera.position.x = mainCarmodel.position.x  +x;
+        camera.position.y = mainCarmodel.position.y  +15;
+        camera.position.z = mainCarmodel.position.z  + z;
+        camera.lookAt(mainCarmodel.position);
     }
 }
 
