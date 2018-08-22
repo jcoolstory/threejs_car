@@ -31,10 +31,38 @@
 		<div id="container">
 		<div id="controls">
 			<div id="group">
-				<label >body color</label>
+				<p>
+					<label >body color</label>
+					<input type="color" v-on:change="colorChange(this)" v-model="bodyColor"/>
+				</p>
+				<p>
+					<label>shininess</label>
+					<input type="text" v-on:change="shininessChange()" v-model="shininessValue">
+				</p>
+				<p>
+					<label>specular</label>
+					<input type="color" @change="specularChange()" v-model="specularValue">
+				</p>
 				
-				 <input type="color" v-on:change="colorChange(this)" v-model="bodyColor"/>
-				<!-- <button type="buton" v-on:click="opendoor"> open </button> -->
+				<label>emissive</label> <br/>
+				<p>
+					<label>R</label>
+					<input type="text" @change="emissiveChange()" v-model="emissiveR">
+				</p>
+				<p>
+					<label>G</label>
+					<input type="text" @change="emissiveChange()" v-model="emissiveG">
+				</p>
+				<p>
+					<label>B</label>
+					<input type="text" @change="emissiveChange()" v-model="emissiveB">
+				</p>
+				<hr/>
+				<div><label>materials</label><br/>
+					<div v-for="material in materials">
+						{{ material.name}} : <input type="checkbox" @change="materialVisibleCheck(material)" v-model="material.visible">
+					</div>
+				</div>
 			</div>
 		</div>
 		</div>

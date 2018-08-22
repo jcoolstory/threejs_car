@@ -5,7 +5,7 @@ var scene, camera , renderer, offsetX ,offsetY, manager, mainCarmodel,
     
 
 // materials
-var bodyMaterial, interiorMaterial, glassMaterial, shadow , controls,envCubemap ,envCubemapBlur
+var bodyMaterial, interiorMaterial, glassMaterial, shadow , controls,envCubemap ,envCubemapBlur, materialInfomation
 
 // flags
 var enableInner = false , press = false , loading = true ;
@@ -64,7 +64,16 @@ function createModels() {
 }
 
 function carTraverse(materials) {
+    
     if (materials) {
+
+        materialInfomation = materials;
+        var materialArray = vueApp.materials;
+        var keys = Object.keys(materials) ;
+        keys.forEach( f=> {
+            materialArray.push( { name : f , visible : false})
+        });
+        // return;
 
         var materialValues = Object.values(materials);
         for (var i = 0 ; i < materialValues.length ; i++) {
@@ -72,18 +81,21 @@ function carTraverse(materials) {
             var material = materialValues[i];
             if (material.name == "carpaint") {
                 
-                bodyMaterial = material;
+                // bodyMaterial = material;
 
-                // bodyMaterial = new THREE.MeshLambertMaterial();
-                // bodyMaterial.copy(material);
-                // materials["carpaint"] = bodyMaterial;
-                // material = bodyMaterial;
+                bodyMaterial = new THREE.MeshLambertMaterial();
+                // material.copy(bodyMaterial);
+                bodyMaterial.copy(material);
+                materials["carpaint"] = bodyMaterial;
+                material = bodyMaterial;
+                material.envMap = envCubemap;
+                material.reflectivity = 0.6;
                 
                 vueApp.bodyColor = "#" + bodyMaterial.color.getHexString();
             }
-            material.envMap = envCubemap;
-            material.reflectivity = 0.6;
-            material.shininess = 0.1;
+            // material.envMap = envCubemap;
+            // material.reflectivity = 0.6;
+            // material.shininess = 0.1;
         }
 
         // if ( child.material.name === "Body") {
@@ -359,6 +371,12 @@ var vueApp = new Vue({
 				{ text: "Uncarted2 " , value : THREE.Uncharted2ToneMapping },
                 { text: "Cineon", value : THREE.CineonToneMapping }
             ],
+            shininessValue : 0.1,
+            specularValue : 0x0,
+            emissiveR : 0x0,
+            emissiveG : 0x0,
+            emissiveB : 0x0,
+            materials : [],
             selectmapping :undefined,
         }
     },
@@ -396,7 +414,26 @@ var vueApp = new Vue({
             bodyMaterial.color = new THREE.Color(this.bodyColor);
 
         },
-    
+        
+        shininessChange() {
+            bodyMaterial.shininess = parseFloat( this.shininessValue);
+        },
+
+        specularChange() {
+            bodyMaterial.specular = new THREE.Color(this.specularValue);
+        },
+
+        emissiveChange() {
+            bodyMaterial.emissive.r = parseFloat(this.emissiveR);
+            bodyMaterial.emissive.g = parseFloat(this.emissiveG);
+            bodyMaterial.emissive.b = parseFloat(this.emissiveB);
+        },
+
+        materialVisibleCheck(elemnt) {
+            materialInfomation[elemnt.name].visible = elemnt.visible;
+            console.log(elemnt)
+        },
+
         toggleRotate(){    
             controls.autoRotate = !controls.autoRotate;
             this.statusRotate =  controls.autoRotate ?   "Stop" : "Rotate";
