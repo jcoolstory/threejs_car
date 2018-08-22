@@ -31,9 +31,19 @@
 		<div id="container">
 		<div id="controls">
 			<div id="group">
-				<label >body color</label>
-				
-				 <input type="color" v-on:change="colorChange(this)" v-model="bodyColor"/>
+				<div>
+				<label >body color</label>				
+				<input type="color" v-on:change="colorChange(this)" v-model="bodyColor"/>
+				</div>
+				<div>
+					<input type="button" v-on:click="toggleCamera(this)" value="camera" />
+				</div>
+				<div>
+					<input type="button" v-on:click="resetPosition()" value="reset" />
+				</div>
+				<div>
+				<span>key press a, w, s, d</span>
+				</div>
 				<!-- <button type="buton" v-on:click="opendoor"> open </button> -->
 			</div>
 		</div>

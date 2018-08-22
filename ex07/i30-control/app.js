@@ -1,8 +1,10 @@
 // controller
 var scene, camera , renderer, offsetX ,offsetY, manager, mainCarmodel,
-    animations = [],
+    animations = [],roadblock , collisionWarning = false, followCamera = false;
     accel = 0 , rotationVelo = 0 ;
+    pointSehpare = undefined;
     mouse = new THREE.Vector2();
+    
     
 
 // materials
@@ -15,14 +17,14 @@ init();
 animate();
 
 function resetCamera(){
-    camera.position.z = -300;
-    camera.position.y = 300;
-    camera.position.x = -300.2;
+    camera.position.z = -200;
+    camera.position.y = 200;
+    camera.position.x = -200;
 
     camera.rotation.x = -0.329;
     camera.rotation.y = -0.75;
     camera.rotation.z = -0.23;
-}
+}   
 
 function init() {
     scene = new THREE.Scene();
@@ -31,7 +33,7 @@ function init() {
     renderer.toneMapping = THREE.Uncharted2ToneMapping;
     document.body.appendChild( renderer.domElement );
     
-    camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 0.1, 1000 );
+    camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 0.1, 2000 );
     resetCamera();
 
     controls = new THREE.OrbitControls( camera, renderer.domElement );
@@ -61,9 +63,12 @@ function init() {
 }
 
 function onKeyPress(evt) {
-    console.log("onKeyPress : " ,evt.key, ":", evt.keyCode)
+    // console.log("onKeyPress : " ,evt.key, ":", evt.keyCode)
     if (evt.key === 'w')
-        accel += 0.1;
+    {
+        if (collisionWarning == false)
+            accel += 0.1;
+    }
     else if (evt.key === "s")
         accel -= 0.1;
     else if (evt.key === "a") 
@@ -74,19 +79,36 @@ function onKeyPress(evt) {
 }
 
 function onKeyDown(evt) {
-    console.log("onKeyDown : " ,evt.key , ":", evt.keyCode)
+    // console.log("onKeyDown : " ,evt.key , ":", evt.keyCode)
 }
 
 function onKeyUp(evt) {
-    console.log("onKeyUp : " ,evt.key, ":", evt.keyCode)
+    // console.log("onKeyUp : " ,evt.key, ":", evt.keyCode)
 }
 
 function createModels() {
     
     createBackground();
     createCar();
+    createPartObjects();
     createShadow();
     
+}
+
+function createPartObjects() {
+    var geometry = new THREE.BoxBufferGeometry( 10, 10, 10 );
+    var material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+    
+    roadblock = new THREE.Mesh( geometry, material );
+    
+    roadblock.position.z = -1000;
+    scene.add( roadblock );
+
+    var geometrySe = new THREE.SphereBufferGeometry(1,10,10);
+    var materialSe = new THREE.MeshBasicMaterial({color:0xff0000});
+
+    pointSehpare = new THREE.Mesh(geometrySe, materialSe);
+    scene.add(pointSehpare);
 }
 
 function carTraverse(materials) {
@@ -160,7 +182,7 @@ function createCar() {
     
     new THREE.MTLLoader()   
     .setPath( '../res/i30/' )
-    .load( 'i30.mtl', function ( materials ) {
+    .load( 'i30-1.mtl', function ( materials ) {
         
         materials.preload();
         console.log(materials);
@@ -296,9 +318,97 @@ function toggleView(){
     
 }
 
+function lineIntersection(srt1, end1,srt2,end2){
+
+    var dx_ba = end1.x - srt1.x;
+    var dx_dc = end2.x - srt2.x;
+    var dy_ba = end1.y - srt1.y;
+    var dy_dc = end2.y - srt2.y;
+    var den = dy_dc * dx_ba - dx_dc * dy_ba;
+
+    if (den == 0)
+        return false;
+        
+
+    var dy_ac = srt1.y-srt2.y;
+    var dx_ac = srt1.x-srt2.x
+    var ua = (dx_dc * dy_ac-dy_dc * dx_ac) / den;
+    var ub = (dx_ba * dy_ac-dy_ba * dx_ac) / den;
+
+    if ( 0 < ua && ua <1 && 0 < ub && ub <1 )
+    {   
+        var nx = srt1.x + dx_ba * ua;
+        var ny = srt1.y + dy_ba * ua;
+        return {x:nx,y:ny};
+    }else{
+        return false;
+    }
+}
+
+function Point(x,y) {
+    this.x = x;
+    this.y = y;
+}
+
+function circlelineintersection(p1,r,p2,p3)  {
+
+    var x = p1.x;
+    var y = p1.y;
+
+    var a = p2.x;
+    var b = p2.y;
+    var c = p3.x;
+    var d = p3.y;
+
+    if (c != a){
+        var m = (d-b)/(c-a);;
+        var n = (b*c-a*d)/(c-a);
+
+        var A = m*m+1;
+        var B1 = (m*n-m*y-x);
+        var C = (x*x+y*y-r*r + n*n - 2 * n * y);
+        var D = B1 * B1 - A*C;
+
+        if (D<0){
+            return []
+        }
+        else if (D==0){
+            var X = -B1/A
+            var Y = m*X+n
+            return [new Point(X,Y)]
+        }
+        else {
+            var X = -(B1 + Math.sqrt(D))/A
+            var Y = m*X + n
+
+            var X2 = -(B1 - Math.sqrt(D))/A
+            var Y2 = m*X2+n
+            return [ new Point(X,Y), new Point(X2,Y2)]
+        }
+    }
+    else {
+        if (a < (x - r) || a > (x + r) ) {
+            return []
+        }
+        else if (a == (x-r) || a ==(x+r)){
+            var X=a;
+            var Y=y;
+            return [new Point(X,Y)]
+        }
+        else {
+            var X = a
+            var Y = y + Math.sqrt( r * r - (a-x)*(a-x))
+            
+            var Y1 = y - Math.sqrt( r * r - (a-x)*(a-x))
+
+            return [new Point(X,Y), new Point(X,Y1)]
+        }
+    }
+}
+
 function update(time){
     if (mainCarmodel) {
-        let current = -(accel > 0.01 ? accel : 0);
+        let current = -( Math.abs(accel) > 0.01 ? accel : 0);
         //mainCarmodel.position.z += current;
         if (rotationVelo > 0.05)
             rotationVelo = 0.05;
@@ -322,11 +432,75 @@ function update(time){
 
         x = Math.sin(mainCarmodel.rotation.y) * 55;
         z = Math.cos(mainCarmodel.rotation.y) * 55;
-        camera.position.x = mainCarmodel.position.x  +x;
-        camera.position.y = mainCarmodel.position.y  +15;
-        camera.position.z = mainCarmodel.position.z  + z;
+
+        if (followCamera) {
+            camera.position.x = mainCarmodel.position.x  +x;
+            camera.position.y = mainCarmodel.position.y  +15;
+            camera.position.z = mainCarmodel.position.z  + z;
+        }
         camera.lookAt(mainCarmodel.position);
+
+        
+       
+        
+        let p =  new Point(roadblock.position.x, roadblock.position.z);
+            let r = 10;
+            let p2 = new Point(mainCarmodel.position.x, mainCarmodel.position.z);
+            let p3 = new Point(0,0);
+            p3.x = mainCarmodel.position.x - Math.sin(mainCarmodel.rotation.y) * 150;
+            p3.y = mainCarmodel.position.z -Math.cos(mainCarmodel.rotation.y) * 150;
+    
+            pointSehpare.position.x =  p3.x;
+            pointSehpare.position.z =  p3.y;
+
+        let distance = getDistance(mainCarmodel, roadblock);
+        if (distance < 150) {
+            
+            let result = circlelineintersection(p,r,p2,p3)
+            if (result.length > 0)
+                collisionWarning = true
+            else 
+                collisionWarning = false;
+            // if (collisionWarning)
+         //       console.log(result);
+        }
+            
+        else
+            collisionWarning = false;
+        
+        if (collisionWarning && accel > 0.0)
+            accel *=0.96;
+
+        if (accel > 4)
+            accel = 4;
+
+ 
+        
     }
+}
+
+function getDistance(src,dst) {
+    let x = src.position.x - dst.position.x;
+    let z = src.position.z - dst.position.z;
+    return Math.sqrt(Math.pow(x,2) + Math.pow(z,2));
+}
+
+function toggleCameraThree() {
+    followCamera = !followCamera;
+
+    if (followCamera == false) {
+        resetCamera();
+    }
+}
+
+function resetPositionThree() {
+    accel = 0;
+    collisionWarning = false;
+    rotationVelo = 0;
+    mainCarmodel.position.x = 0;
+    mainCarmodel.position.y= 0;
+    mainCarmodel.position.z=0;
+    mainCarmodel.rotation.y = 0;
 }
 
 function animate(time) {
@@ -472,6 +646,14 @@ var vueApp = new Vue({
     
         toggleinner(){
             this.statusView =  toggleView() ? "Out View" : "Inner View";
+        },
+
+        toggleCamera() {
+            toggleCameraThree();            
+        },
+
+        resetPosition() {
+            resetPositionThree();
         }
     }
 })
