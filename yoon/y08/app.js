@@ -86,6 +86,7 @@ function toRadian(degree) {
 
 function animate(time) {
     requestAnimationFrame( animate );
+    console.log(camera);
     tierMesh.forEach(f=>{
         //f.rotation += toRadian(1);
         
