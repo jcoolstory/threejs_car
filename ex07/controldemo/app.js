@@ -228,23 +228,58 @@ function createCar() {
         var box = new THREE.BoxHelper( obj, 0xffff00 );
         box.geometry.computeBoundingBox();
         obj.position.y = -box.geometry.boundingBox.min.y;
-        // obj.position.y = 0;
-        roadCar.push(initRoadCar(obj));
-        scene.add( obj );
+        // obj.position.y = 0
+        
+        ;
+        let newCar1 = initRoadCar(obj);
+        newCar1.accel = 0.0;
+        newCar1.resetPoint.x = 0;
+        newCar1.resetPoint.y = -540;
+
+        startRoadCar(newCar1);
+        roadCar.push(newCar1);
+        scene.add(newCar1.model);
+
+        let newCar2 = initRoadCar(obj);
+
+        newCar2.accel = 0.5;
+        newCar2.resetPoint.x = -40;
+        newCar2.resetPoint.y = -240;
+        newCar2.model.rotation.y = toRadian(180);
+        startRoadCar(newCar2);
+        roadCar.push(newCar2);
+        scene.add(newCar2.model);
+
+        let newCar3 = initRoadCar(obj);
+
+        newCar3.accel = 0.4;
+        newCar3.resetPoint.x = 15;
+        newCar3.resetPoint.y = -200;
+        
+
+        startRoadCar(newCar3);
+        roadCar.push(newCar3);
+        scene.add(newCar3.model);
+
+        // scene.add( obj );
     });
 }
 
-function initRoadCar(car) {
+function initRoadCar(carmodel) {
+    let car = carmodel.clone();
     let model = {
         model : car,
-        accel : 0.5,
+        accel : 0.0,
         rotationVelo : 0,
-        resetPoint : { x:0,y:-540}
+        resetPoint : { x:0,y:0}
     }
-    car.position.x = model.resetPoint.x;
-    car.position.z = model.resetPoint.y;
 
     return model;
+}
+
+function startRoadCar(car) {
+    car.model.position.x = car.resetPoint.x;
+    car.model.position.z = car.resetPoint.y;
 }
 
 function createShadow() {
@@ -323,12 +358,10 @@ function createBackground() {
         }
     });
     
-    console.log(groundTexture.image);
     // groundTexture.wrapS = THREE.RepeatWrapping;
     // groundTexture.wrapT = THREE.RepeatWrapping;
     groundTexture.magFilter = THREE.NearestFilter;
     groundTexture.minFilter = THREE.NearestFilter;
-    console.log(groundTexture);
     // groundTexture.repeat.set( 40, 40 );
     var groundGeo = new THREE.PlaneGeometry( 128*20, 128*20,1,1 );
     var groundMat = new THREE.MeshLambertMaterial({ color:0x222222, shininess:0});
@@ -519,9 +552,9 @@ function updateCars(car){
 }
 
 function update(time){
-    // for ( var i = 0 ; i < roadCar.length ; i++) {
-    //     updateCars(roadCar[i]);
-    // }
+    for ( var i = 0 ; i < roadCar.length ; i++) {
+        updateCars(roadCar[i]);
+    }
     if (mainCarmodel) {
         let current = -( Math.abs(accel) > 0.01 ? accel : 0);
         //mainCarmodel.position.z += current;
@@ -532,9 +565,18 @@ function update(time){
         let x = Math.sin(mainCarmodel.rotation.y) * current;
         let z = Math.cos(mainCarmodel.rotation.y) * current;
 
-        mainCarmodel.position.x += x;
-        mainCarmodel.position.z += z;
+        let startx = -128*20/2;
+        let starty = -128*20/2;
+        //mainCarmodel.position.x
+        let locationX = parseInt( (mainCarmodel.position.x + 10)  / 20 + 64) ;
+        let locationY = parseInt( (mainCarmodel.position.z + 10)  / 20 + 64);
         
+        if (mapBuffer[locationX  + locationY * 128] <= 1 || accel < 0) {
+            mainCarmodel.position.x += x;
+            mainCarmodel.position.z += z;
+            // console.log(locationX ,locationY , " : " ,  mapBuffer[locationX  + locationY * 128]);
+        }
+
         // if (accel > 0.003)
         //     accel -= 0.003;
 
