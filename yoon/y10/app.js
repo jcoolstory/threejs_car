@@ -48,10 +48,7 @@ var frontLeftWheelMesh = null,
     backLeftWheelMesh = null,
     backRightWheelMesh = null;
 
-var bodyGeometry = null,
-    wheelGeometry = null,
-    bodyMaterials = null,
-    wheelMaterials = null;
+var wheelOffset;
 
 init(function(){
     clock = new THREE.Clock();
@@ -85,7 +82,7 @@ function init(callback){
     renderer.shadowMap.enabled = false;
     scene.background = new THREE.Color(0xffffff);
 
-    var controls = new THREE.OrbitControls( camera, renderer.domElement );
+    //var controls = new THREE.OrbitControls( camera, renderer.domElement );
 
     var gridHelper = new THREE.GridHelper(500000, 50000);
     gridHelper.material.transparent = false;
@@ -99,6 +96,8 @@ function init(callback){
 
     stats = new Stats();
     document.body.appendChild( stats.dom );
+
+    wheelOffset = new THREE.Vector3();
 
     callback();
 }
@@ -134,51 +133,84 @@ function createCar(){
     texturedMaterial.specular = new THREE.Color(1,1,1);
     texturedMaterial.map = texture;
 
+    var mainFrameGeometry = null,
+        wheelGeometry = null,
+        mainFrameMaterial = null,
+        wheelMaterial = null;
+
+    var vector = new THREE.Vector3();
+
     carMaterial = objLoader
     .setPath(filePath)
     .load("/Porsche_911_GT2.obj", function(obj){
         obj.traverse(function(child){
             if (child instanceof THREE.Mesh) {
-                if (tier.includes(child.name) )
-                {
-                    child.material = tierMaterial;
 
-                    if(child.name == "part 028"){
-                        backLeftWheelMesh = new THREE.Mesh(child.geometry, child.material);
-                        backLeftWheelMesh.position.set(0,0,0);
-                    }else if(child.name == "part 027"){
-                        frontLeftWheelMesh = new THREE.Mesh(child.geometry, child.material);
-                    }else if(child.name == "part 026"){
-                        frontRightWheelMesh = new THREE.Mesh(child.geometry, child.material);
-                    }else if(child.name == "part 025"){
-                        backRightWheelMesh = new THREE.Mesh(child.geometry, child.material);
+                if (tier.includes(child.name) )//tire
+                {
+
+                    child.material = tierMaterial;
+                    wheelGeometry = child.geometry;
+                    wheelMaterial = child.material;
+                    wheelGeometry.computeBoundingBox();
+                    var bounding = wheelGeometry.boundingBox;
+                    wheelOffset.addVectors(bounding.min, bounding.max);
+                    wheelOffset.multiplyScalar(0.5);
+                    wheelDiameter = bounding.max.y - bounding.min.y;
+                    
+                    wheelGeometry.center();
+
+                    if(child.name == "part 028"){//뒷바퀴 왼쪽
+                        vector.multiplyVectors(wheelOffset,  new THREE.Vector3( modelScale, modelScale, -modelScale ));
+                        vector.z += 2.3;
+                        vector.x -= 1.5;
+
+                        backLeftWheelMesh = new THREE.Mesh(wheelGeometry, wheelMaterial);
+                        backLeftWheelMesh.position.add(vector);
+                    }else if(child.name == "part 027"){//앞바퀴 왼쪽
+                        vector.multiplyVectors(wheelOffset,  new THREE.Vector3( modelScale, modelScale, modelScale ));
+                        frontLeftWheel.position.add(vector);
+
+                        frontLeftWheelMesh = new THREE.Mesh(wheelGeometry, wheelMaterial);
+                    }else if(child.name == "part 026"){//앞바퀴 오른쪽
+                        vector.multiplyVectors(wheelOffset,  new THREE.Vector3( -modelScale, modelScale, modelScale ));
+                        vector.x -= 1.5;
+                        frontRightWheel.position.add(vector);
+
+                        frontRightWheelMesh = new THREE.Mesh(wheelGeometry, wheelMaterial);
+                    }else if(child.name == "part 025"){//뒷바퀴 오른쪽
+                        vector.multiplyVectors(wheelOffset,  new THREE.Vector3( -modelScale, modelScale, -modelScale ));
+                        vector.z += 2.3;
+
+                        backRightWheelMesh = new THREE.Mesh(wheelGeometry, wheelMaterial);
+                        backRightWheelMesh.position.add(vector);
                     }
                 }
-                else
+                else//main frame
                 {
                     child.material = texturedMaterial;
                     carFrame.add(new THREE.Mesh(child.geometry, child.material));
                 }
+                
                 if (ignoreList.includes(child.name))
                 {
                     child.material = glassMaterial;
                 }
             }
         });
+
         carMaterial = carFrame;
         scene.add(carMaterial);
 
-
-
         frontLeftWheel.add(frontLeftWheelMesh);
-        scene.add(frontLeftWheel);
+        carMaterial.add(frontLeftWheel);
         
         frontRightWheel.add(frontRightWheelMesh);
-        scene.add(frontRightWheel);
+        carMaterial.add(frontRightWheel);
 
-        scene.add(backLeftWheelMesh);
-        
-        scene.add(backRightWheelMesh);
+        carMaterial.add(backLeftWheelMesh);
+        carMaterial.add(backRightWheelMesh);
+
     });
 }
 
@@ -226,6 +258,7 @@ function keyPressGroup(evnt){
 function updateCarModel(delta){
     if(!carMaterial)
         return;
+        
     if(pressedKeys.moveForward){
         speed = THREE.Math.clamp(speed - delta * FRONT_ACCELERATION, MAX_REVERSE_SPEED, MAX_SPEED );
         acceleration = THREE.Math.clamp(acceleration - delta, - 1, 1 );
@@ -270,20 +303,20 @@ function updateCarModel(delta){
 
     carMaterial.rotation.y = carOrientation;
 
-    // camera.position.x += Math.sin( carOrientation ) * forwardDelta;
-    // camera.position.z += Math.cos( carOrientation ) * forwardDelta;
+    camera.position.x += Math.sin( carOrientation ) * forwardDelta;
+    camera.position.z += Math.cos( carOrientation ) * forwardDelta;
     // camera.rotation.y = wheelOrientation;
 
     var angularSpeedRatio = 1 / ( modelScale * ( this.wheelDiameter / 2 ) );
     var wheelDelta = forwardDelta * angularSpeedRatio;
     
-    // frontLeftWheelMesh.rotation.x += wheelDelta;
-    // frontRightWheelMesh.rotation.x += wheelDelta;
-    // backLeftWheelMesh.rotation.x += wheelDelta;
-    // backRightWheelMesh.rotation.x += wheelDelta;
+    frontLeftWheelMesh.rotation.x += wheelDelta;
+    frontRightWheelMesh.rotation.x += wheelDelta;
+    backLeftWheelMesh.rotation.x += wheelDelta;
+    backRightWheelMesh.rotation.x += wheelDelta;
     
-    // frontLeftWheel.rotation.y = wheelOrientation;
-    // frontRightWheel.rotation.y = wheelOrientation;    
+    frontLeftWheel.rotation.y = -wheelOrientation;
+    frontRightWheel.rotation.y = -wheelOrientation;    
 }
 
 function exponentialEaseOut( k ) {

@@ -48,7 +48,6 @@ THREE.Car = function () {
 
 	this.frontLeftWheelMesh = null;
 	this.frontRightWheelMesh = null;
-
 	this.backLeftWheelMesh = null;
 	this.backRightWheelMesh = null;
 
