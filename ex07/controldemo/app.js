@@ -1,7 +1,7 @@
 // controller
 var scene, camera , renderer, offsetX ,offsetY, manager, mainCarmodel,
     animations = [],roadblock , collisionWarning = false, followCamera = false;
-    accel = 0 , rotationVelo = 0 ;
+    accel = 0 , rotationVelo = 0 ; roadCar = [];
     pointSehpare = undefined;
     mouse = new THREE.Vector2();
     
@@ -18,7 +18,7 @@ animate();
 
 function resetCamera(){
     camera.position.z = -200;
-    camera.position.y = 200;
+    camera.position.y = 100;
     camera.position.x = -200;
 
     camera.rotation.x = -0.329;
@@ -101,14 +101,14 @@ function createPartObjects() {
     
     roadblock = new THREE.Mesh( geometry, material );
     
-    roadblock.position.z = -1000;
-    scene.add( roadblock );
+    roadblock.position.z = -540;
+    // scene.add( roadblock );
 
     var geometrySe = new THREE.SphereBufferGeometry(1,10,10);
     var materialSe = new THREE.MeshBasicMaterial({color:0xff0000});
 
     pointSehpare = new THREE.Mesh(geometrySe, materialSe);
-    scene.add(pointSehpare);
+    // scene.add(pointSehpare);
 }
 
 function carTraverse(materials) {
@@ -178,8 +178,8 @@ function createCar() {
     envCubemap = new THREE.CubeTextureLoader().load( urls );
 
     var onError = function (xhr ) {
-    };    
-    //../res/Porsche_911_GT2.obj
+    };
+    
     new THREE.MTLLoader()   
     .setPath( '../res/Aventador/' )
     .load( 'Avent.mtl', function ( materials ) {
@@ -190,13 +190,61 @@ function createCar() {
         new THREE.OBJLoader(manager)
             .setMaterials( materials )
             .setPath( '../res/Aventador/' )            
-            .load( 'Avent.obj', function ( object ) {
-                // object.traverse(carTraverse);
+            .load( 'Avent-flip.obj', function ( object ) {
+                
                 mainCarmodel = object;
                 scene.add( object );
                 shadow.visible = true;
+
+                // roadCar = object.clone();
+                // initRoadCar(roadCar);
+                // scene.add(roadCar);
+
             }, vueApp.onProgress, onError );
     } );
+
+
+    var texture = new THREE.TextureLoader(manager).load( '../res/Porsche/skin04/0000.BMP' );
+    var loader = new THREE.OBJLoader(manager);
+    var materialColor = new THREE.Color(1,1,1);
+    var texturedMaterial =new THREE.MeshPhongMaterial( { color: materialColor, flatShading:false, side: THREE.DoubleSide } )
+    //var texturedMaterial = new MeshLambertMaterial( { color: materialColor, flatShading:false, side: THREE.DoubleSide } )
+    //var texturedMaterial = new THREE.MeshPhongMaterial( { color: materialColor,wireframe: true } );
+    texturedMaterial.shininess = 40;
+    texturedMaterial.specular = new THREE.Color(1,1,1);
+    texturedMaterial.map = texture;
+
+    loader.load('../res/Porsche/Porsche_911_GT2.obj', function (obj){
+        obj.traverse ( function ( child ) { 
+            if ( child instanceof THREE.Mesh) {
+                
+                child.material = texturedMaterial;
+            }
+        });
+        obj.scale.x = 1.3;
+        obj.scale.y = 1.3;
+        obj.scale.z = 1.3;
+        obj.updateMatrix();
+        var box = new THREE.BoxHelper( obj, 0xffff00 );
+        box.geometry.computeBoundingBox();
+        obj.position.y = -box.geometry.boundingBox.min.y;
+        // obj.position.y = 0;
+        roadCar.push(initRoadCar(obj));
+        scene.add( obj );
+    });
+}
+
+function initRoadCar(car) {
+    let model = {
+        model : car,
+        accel : 0.5,
+        rotationVelo : 0,
+        resetPoint : { x:0,y:-540}
+    }
+    car.position.x = model.resetPoint.x;
+    car.position.z = model.resetPoint.y;
+
+    return model;
 }
 
 function createShadow() {
@@ -294,11 +342,7 @@ function createBackground() {
     // var helper = new THREE.GridHelper( 5000, 50 );
     // helper.material.transparent = false;
     // scene.add(helper);
-
-
-    
 }
-
 
 function createLight(){
     
@@ -448,7 +492,36 @@ function circlelineintersection(p1,r,p2,p3)  {
     }
 }
 
+function updateCars(car){
+    if (! car )
+        return;
+
+    let current =  -(Math.abs(car.accel) > 0.01 ? car.accel :0);
+
+    if (car.rotationVelo > 0.05)
+        car.rotationVelo = 0.05;
+    
+    if ( Math.abs(current) > 0.0)
+        car.model.rotation.y += car.rotationVelo;
+
+    let x = Math.sin(car.model.rotation.y) * current;
+    let z = Math.cos(car.model.rotation.y) * current;
+    car.model.position.x += x;
+    car.model.position.z += z;
+    
+    if (car.model.accel > 0.003)
+        car.model.accel -= 0.003;
+
+    if ( Math.abs(car.model.rotationVelo) > 0.001)
+        car.model.rotationVelo *= 0.95;
+    else
+        car.model.rotationVelo = 0;
+}
+
 function update(time){
+    // for ( var i = 0 ; i < roadCar.length ; i++) {
+    //     updateCars(roadCar[i]);
+    // }
     if (mainCarmodel) {
         let current = -( Math.abs(accel) > 0.01 ? accel : 0);
         //mainCarmodel.position.z += current;
@@ -462,28 +535,26 @@ function update(time){
         mainCarmodel.position.x += x;
         mainCarmodel.position.z += z;
         
-        // console.log(toDegree(mainCarmodel.rotation.y));
-        if (accel > 0.002)
-            accel -= 0.002;
+        // if (accel > 0.003)
+        //     accel -= 0.003;
 
         if ( Math.abs(rotationVelo) > 0.001)
             rotationVelo *= 0.95;
         else
             rotationVelo = 0;
-        // controls.update();
 
-        x = Math.sin(mainCarmodel.rotation.y) * 55;
-        z = Math.cos(mainCarmodel.rotation.y) * 55;
+        x = Math.sin(mainCarmodel.rotation.y) * 20;
+        z = Math.cos(mainCarmodel.rotation.y) * 20;
 
         if (followCamera) {
-            camera.position.x = mainCarmodel.position.x  +x;
-            camera.position.y = mainCarmodel.position.y  +15;
+            camera.position.x = mainCarmodel.position.x  + x;
+            camera.position.y = mainCarmodel.position.y  + 5;
             camera.position.z = mainCarmodel.position.z  + z;
         }
         camera.lookAt(mainCarmodel.position);
 
         let p =  new Point(roadblock.position.x, roadblock.position.z);
-        let r = 10;
+        let r = 3;
         let p2 = new Point(mainCarmodel.position.x, mainCarmodel.position.z);
         let p3 = new Point(0,0);
         p3.x = mainCarmodel.position.x - Math.sin(mainCarmodel.rotation.y) * 150;
@@ -493,28 +564,25 @@ function update(time){
         pointSehpare.position.z =  p3.y;
 
         let distance = getDistance(mainCarmodel, roadblock);
-        if (distance < 150) {
+        if (distance < 80) {
             
             let result = circlelineintersection(p,r,p2,p3)
             if (result.length > 0)
                 collisionWarning = true
             else 
                 collisionWarning = false;
-            // if (collisionWarning)
-         //       console.log(result);
         }
-            
         else
             collisionWarning = false;
         
         if (collisionWarning && accel > 0.0)
             accel *=0.96;
 
-        if (accel > 4)
-            accel = 4;
+        if (accel > 2)
+            accel = 2;
 
- 
-        
+        if (accel < -1)
+            accel = -1;
     }
 }
 
