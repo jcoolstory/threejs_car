@@ -60,6 +60,8 @@ function init() {
     // scene.background = envCubemapBlur;
     // scene.background = envCubemap;
     // raycaster = new THREE.Raycaster();
+
+    toggleCameraThree();
 }
 
 function onKeyPress(evt) {
