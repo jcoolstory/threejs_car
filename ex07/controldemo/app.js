@@ -1,9 +1,58 @@
 // controller
-var scene, camera , renderer, offsetX ,offsetY, manager, mainCarmodel,
+var scene, camera , renderer, offsetX ,offsetY, manager, mainCarmodel, 
     animations = [],roadblock , collisionWarning = false, followCamera = false;
-    accel = 0 , rotationVelo = 0 ; roadCar = [];
+    accel = 0 , rotationVelo = 0 ,stats = undefined , controlSteer = false; 
     pointSehpare = undefined;
     mouse = new THREE.Vector2();
+    clock = new THREE.Clock();
+const groundScale = 20;
+var roadCar = [
+    {
+        accel : 0.0,
+        resetPoint : { x: 0 , y : -540 },
+        rotationVelo :0,
+        direction : 0
+    },
+    {
+        accel : 0.5,
+        resetPoint : { x : -20 , y:-240},
+        rotationVelo :0,
+        direction : toRadian(180)
+    },
+    {
+        accel : 0.4,
+        resetPoint : { x:15, y:-200},
+        rotationVelo :0,
+        direction : 0
+    }
+
+];
+
+// let newCar1 = initRoadCar(obj);
+// newCar1.accel = 0.0;
+// newCar1.resetPoint.x = 0;
+// newCar1.resetPoint.y = -540;
+
+// startRoadCar(newCar1);
+// roadCar.push(newCar1);
+// scene.add(newCar1.model);
+
+// let newCar2 = initRoadCar(obj);
+
+// newCar2.accel = 0.5;
+// newCar2.resetPoint.x = -40;
+// newCar2.resetPoint.y = -240;
+// newCar2.model.rotation.y = toRadian(180);
+// startRoadCar(newCar2);
+// roadCar.push(newCar2);
+// scene.add(newCar2.model);
+
+// let newCar3 = initRoadCar(obj);
+
+// newCar3.accel = 0.4;
+// newCar3.resetPoint.x = 15;
+// newCar3.resetPoint.y = -200;
+
     
 var mapBuffer = [];    
 
@@ -33,7 +82,7 @@ function init() {
     renderer.toneMapping = THREE.Uncharted2ToneMapping;
     document.body.appendChild( renderer.domElement );
     
-    camera = new THREE.PerspectiveCamera( 35, window.innerWidth / window.innerHeight, 0.1, 2000 );
+    camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 2000 );
     resetCamera();
 
     controls = new THREE.OrbitControls( camera, renderer.domElement );
@@ -62,6 +111,8 @@ function init() {
     // raycaster = new THREE.Raycaster();
 
     toggleCameraThree();
+    stats = new Stats();
+    document.body.appendChild( stats.dom );
 }
 
 function onKeyPress(evt) {
@@ -69,14 +120,20 @@ function onKeyPress(evt) {
     if (evt.key === 'w')
     {
         if (collisionWarning == false)
-            accel += 0.1;
+            accel += 6;
     }
     else if (evt.key === "s")
-        accel -= 0.1;
+        accel -= 3;
     else if (evt.key === "a") 
-        rotationVelo += 0.003;
+    {
+        controlSteer = true;
+        rotationVelo += 3;
+    }
     else if (evt.key === "d")
-        rotationVelo -= 0.003;
+    {
+        controlSteer = true;
+        rotationVelo -= 3;
+    }
 
 }
 
@@ -85,7 +142,9 @@ function onKeyDown(evt) {
 }
 
 function onKeyUp(evt) {
-    // console.log("onKeyUp : " ,evt.key, ":", evt.keyCode)
+     
+    if (evt.key === "a" || evt.key === "d") 
+        controlSteer = false;
 }
 
 function createModels() {
@@ -201,7 +260,9 @@ function createCar() {
                 // roadCar = object.clone();
                 // initRoadCar(roadCar);
                 // scene.add(roadCar);
-
+                var box = new THREE.BoxHelper( object, 0xffff00 );
+                box.geometry.computeBoundingBox();
+                console.log(box.geometry.boundingBox)
             }, vueApp.onProgress, onError );
     } );
 
@@ -233,55 +294,25 @@ function createCar() {
         // obj.position.y = 0
         
         ;
-        let newCar1 = initRoadCar(obj);
-        newCar1.accel = 0.0;
-        newCar1.resetPoint.x = 0;
-        newCar1.resetPoint.y = -540;
-
-        startRoadCar(newCar1);
-        roadCar.push(newCar1);
-        scene.add(newCar1.model);
-
-        let newCar2 = initRoadCar(obj);
-
-        newCar2.accel = 0.5;
-        newCar2.resetPoint.x = -40;
-        newCar2.resetPoint.y = -240;
-        newCar2.model.rotation.y = toRadian(180);
-        startRoadCar(newCar2);
-        roadCar.push(newCar2);
-        scene.add(newCar2.model);
-
-        let newCar3 = initRoadCar(obj);
-
-        newCar3.accel = 0.4;
-        newCar3.resetPoint.x = 15;
-        newCar3.resetPoint.y = -200;
-        
-
-        startRoadCar(newCar3);
-        roadCar.push(newCar3);
-        scene.add(newCar3.model);
-
-        // scene.add( obj );
+        for( var i = 0 ; i < roadCar.length ; i++) {
+            initRoadCar(obj,roadCar[i]);
+            startRoadCar(roadCar[i])
+            scene.add(roadCar[i].model);
+        }
     });
 }
 
-function initRoadCar(carmodel) {
+function initRoadCar(carmodel, object) {
     let car = carmodel.clone();
-    let model = {
-        model : car,
-        accel : 0.0,
-        rotationVelo : 0,
-        resetPoint : { x:0,y:0}
-    }
-
-    return model;
+    object.model = car;
+    return car;
 }
 
 function startRoadCar(car) {
     car.model.position.x = car.resetPoint.x;
     car.model.position.z = car.resetPoint.y;
+    car.model.rotation.y = car.direction;
+    console.log(car.model)
 }
 
 function createShadow() {
@@ -347,13 +378,13 @@ function createBackground() {
             // mesh.position.x = Math.random() * 1600 - 800;
             let x = i % width;
             let y = i / width;
-            mesh.position.x = x *20 - 128 * 10;
-            mesh.position.z = y * 20  - 128 * 10;
+            mesh.position.x = x * groundScale - 128 * groundScale / 2;
+            mesh.position.z = y * groundScale  - 128 * groundScale / 2;
             mesh.position.y = 0;
             // mesh.position.z = Math.random() * 1600 - 800;
-            mesh.scale.x = 20;
+            mesh.scale.x = groundScale;
             mesh.scale.y = mapBuffer[i];
-            mesh.scale.z = 20;
+            mesh.scale.z = groundScale;
             mesh.updateMatrix();
             mesh.matrixAutoUpdate = false;
             scene.add( mesh );
@@ -383,7 +414,7 @@ function createLight(){
     
     var hemisphereLight = new THREE.HemisphereLight( 0xeeeeee ,0x111111)     
     var ambientLight = new THREE.AmbientLight( 0xffffff,0.6 );
-    var pointLight = new THREE.PointLight( 0xeeeeee, 1);
+    var pointLight = new THREE.PointLight( 0xeeeeee, 0.6);
     var directLight = new THREE.DirectionalLight(0xffffff, 0.8);
 
     directLight.position.x = 5;
@@ -395,7 +426,7 @@ function createLight(){
     pointLight.position.z = 0;
     // camera.add(directLight);
     scene.add(hemisphereLight);
-    // scene.add(pointLight);
+    scene.add(pointLight);
     
     scene.add( ambientLight );
 }
@@ -532,63 +563,78 @@ function updateCars(car){
         return;
 
     let current =  -(Math.abs(car.accel) > 0.01 ? car.accel :0);
-
+    // console.log(current)
     if (car.rotationVelo > 0.05)
         car.rotationVelo = 0.05;
     
     if ( Math.abs(current) > 0.0)
         car.model.rotation.y += car.rotationVelo;
 
+    
     let x = Math.sin(car.model.rotation.y) * current;
     let z = Math.cos(car.model.rotation.y) * current;
+    // console.log(car.model.rotation.y)
     car.model.position.x += x;
     car.model.position.z += z;
     
-    if (car.model.accel > 0.003)
-        car.model.accel -= 0.003;
+    
+    // if (car.accel > 0.003)
+    //     car.accel -= 0.003;
 
-    if ( Math.abs(car.model.rotationVelo) > 0.001)
-        car.model.rotationVelo *= 0.95;
+    if ( Math.abs(car.rotationVelo) > 0.001)
+        car.rotationVelo *= 0.95;
     else
-        car.model.rotationVelo = 0;
+        car.rotationVelo = 0;
+    // console.log(car.model.position)
 }
 
+
+// browser visible changed event
+// document.addEventListener("visibilitychange", function() {
+//     console.log(document.hidden, document.visibilityState);
+//   }, false);
+  
+  
 function update(time){
+    
     for ( var i = 0 ; i < roadCar.length ; i++) {
-        updateCars(roadCar[i]);
+        if (roadCar[i].model)
+            updateCars(roadCar[i]);
     }
     if (mainCarmodel) {
-        let current = -( Math.abs(accel) > 0.01 ? accel : 0);
+        let current = -( Math.abs(accel) > 0.01 ? accel : 0) * time;
         //mainCarmodel.position.z += current;
-        if (rotationVelo > 0.05)
-            rotationVelo = 0.05;
+        if (rotationVelo > 45)
+            rotationVelo = 45;
         if ( Math.abs(current) > 0.0)
-            mainCarmodel.rotation.y += rotationVelo;
+            mainCarmodel.rotation.y += (toRadian(rotationVelo) * time);
         let x = Math.sin(mainCarmodel.rotation.y) * current;
         let z = Math.cos(mainCarmodel.rotation.y) * current;
 
-        let startx = -128*20/2;
-        let starty = -128*20/2;
-        //mainCarmodel.position.x
-        let locationX = parseInt( (mainCarmodel.position.x + 10)  / 20 + 64) ;
-        let locationY = parseInt( (mainCarmodel.position.z + 10)  / 20 + 64);
+        
+        
+        let locationX = parseInt( (mainCarmodel.position.x + 10)  / groundScale + 64) ;
+        let locationY = parseInt( (mainCarmodel.position.z + 10)  / groundScale + 64);
         
         if (mapBuffer[locationX  + locationY * 128] <= 1 || accel < 0) {
             mainCarmodel.position.x += x;
             mainCarmodel.position.z += z;
-            // console.log(locationX ,locationY , " : " ,  mapBuffer[locationX  + locationY * 128]);
+            
         }
 
         // if (accel > 0.003)
         //     accel -= 0.003;
 
-        if ( Math.abs(rotationVelo) > 0.001)
-            rotationVelo *= 0.95;
-        else
-            rotationVelo = 0;
+        if (controlSteer == false)
+            if (Math.abs(rotationVelo) > 1 ) {
+                rotationVelo *= 0.9;
+            } else {
+                rotationVelo = 0;
+            }
+             
 
-        x = Math.sin(mainCarmodel.rotation.y) * 20;
-        z = Math.cos(mainCarmodel.rotation.y) * 20;
+        x = Math.sin(mainCarmodel.rotation.y) * 10;
+        z = Math.cos(mainCarmodel.rotation.y) * 10;
 
         if (followCamera) {
             camera.position.x = mainCarmodel.position.x  + x;
@@ -622,11 +668,11 @@ function update(time){
         if (collisionWarning && accel > 0.0)
             accel *=0.96;
 
-        if (accel > 2)
-            accel = 2;
+        if (accel > 20)
+            accel = 20;
 
-        if (accel < -1)
-            accel = -1;
+        if (accel < -10)
+            accel = -10;
     }
 }
 
@@ -657,9 +703,10 @@ function resetPositionThree() {
 function animate(time) {
     
     requestAnimationFrame( animate );
+    
     // if (loading)
     //     return
-    update(time);
+    update(clock.getDelta());
 
     // if (animations.length){
         
@@ -680,7 +727,7 @@ function animate(time) {
     // if (enableInner == false) {
     //     controls.update();
     // }
-    
+    stats.update();
     renderer.render( scene, camera );
 }
 
@@ -733,7 +780,6 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
     renderer.setSize( window.innerWidth, window.innerHeight );
 }
-console.log(renderer);
 
 var vueApp = new Vue({
     el : "#wrap",
