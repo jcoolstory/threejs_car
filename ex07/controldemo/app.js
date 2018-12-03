@@ -1,8 +1,9 @@
 // controller
-var scene, camera , renderer, offsetX ,offsetY, manager, mainCarmodel, 
+var scene, camera , renderer, offsetX ,offsetY, manager, mainCarmodel, mainBounding,
     animations = [],roadblock , collisionWarning = false, followCamera = false;
     accel = 0 , rotationVelo = 0 ,stats = undefined , controlSteer = false; 
     pointSehpare = undefined;
+    lines = [];
     mouse = new THREE.Vector2();
     clock = new THREE.Clock();
 const groundScale = 20;
@@ -82,7 +83,7 @@ function init() {
     renderer.toneMapping = THREE.Uncharted2ToneMapping;
     document.body.appendChild( renderer.domElement );
     
-    camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1, 2000 );
+    camera = new THREE.PerspectiveCamera( 60, window.innerWidth / window.innerHeight, 0.1,1000 );
     resetCamera();
 
     controls = new THREE.OrbitControls( camera, renderer.domElement );
@@ -120,19 +121,19 @@ function onKeyPress(evt) {
     if (evt.key === 'w')
     {
         if (collisionWarning == false)
-            accel += 6;
+            accel += 5;
     }
     else if (evt.key === "s")
         accel -= 3;
     else if (evt.key === "a") 
     {
         controlSteer = true;
-        rotationVelo += 3;
+        rotationVelo += 2;
     }
     else if (evt.key === "d")
     {
         controlSteer = true;
-        rotationVelo -= 3;
+        rotationVelo -= 2;
     }
 
 }
@@ -260,9 +261,9 @@ function createCar() {
                 // roadCar = object.clone();
                 // initRoadCar(roadCar);
                 // scene.add(roadCar);
-                var box = new THREE.BoxHelper( object, 0xffff00 );
-                box.geometry.computeBoundingBox();
-                console.log(box.geometry.boundingBox)
+                mainBounding = new THREE.BoxHelper( mainCarmodel, 0xffff00 );
+                scene.add(mainBounding);
+                mainBounding.geometry.computeBoundingBox();                
             }, vueApp.onProgress, onError );
     } );
 
@@ -284,12 +285,14 @@ function createCar() {
                 child.material = texturedMaterial;
             }
         });
-        obj.scale.x = 1.3;
-        obj.scale.y = 1.3;
-        obj.scale.z = 1.3;
+        // obj.scale.x = 1.3;
+        // obj.scale.y = 1.3;
+        // obj.scale.z = 1.3;
         obj.updateMatrix();
         var box = new THREE.BoxHelper( obj, 0xffff00 );
         box.geometry.computeBoundingBox();
+        
+        // scene.add(box);
         obj.position.y = -box.geometry.boundingBox.min.y;
         // obj.position.y = 0
         
@@ -305,6 +308,11 @@ function createCar() {
 function initRoadCar(carmodel, object) {
     let car = carmodel.clone();
     object.model = car;
+    
+    var box = new THREE.BoxHelper( carmodel, 0xfff0ff );
+    box.geometry.computeBoundingBox();
+    scene.add(box);
+    object.box = box;
     return car;
 }
 
@@ -339,15 +347,15 @@ function createBackground() {
     var textureCubeBlur = new THREE.CubeTextureLoader().load(urls2);
     envCubemapBlur = textureCubeBlur;
     // // create dome or cylinder
-    var domTexture =   new THREE.TextureLoader().load("../../res/textures/ground/pattern.png");
-    domTexture.wrapS = THREE.RepeatWrapping;
-    domTexture.wrapT = THREE.RepeatWrapping;
-    domTexture.repeat.set( 4, 4 );
-    var domeMaterial = new THREE.MeshBasicMaterial( { color:0xffffff , side: THREE.BackSide } );
-    domeMaterial.envMap = textureCubeBlur;
-    domeMaterial.reflectivity = 1;
+    // var domTexture =   new THREE.TextureLoader().load("../../res/textures/ground/pattern.png");
+    // domTexture.wrapS = THREE.RepeatWrapping;
+    // domTexture.wrapT = THREE.RepeatWrapping;
+    // domTexture.repeat.set( 16, 16 );
+    // var domeMaterial = new THREE.MeshBasicMaterial( { color:0xffffff , side: THREE.BackSide } );
+    // domeMaterial.envMap = textureCubeBlur;
+    // domeMaterial.reflectivity = 1;
 
-    var dome = new THREE.Mesh( new THREE.CylinderBufferGeometry( 150, 150, 20,32 ), domeMaterial );
+    // var dome = new THREE.Mesh( new THREE.CylinderBufferGeometry( 150, 150, 20,32 ), domeMaterial );
     // dome.position.y = 10;
     // scene.add( dome );
 
@@ -374,14 +382,15 @@ function createBackground() {
         for ( var i = 0; i < mapBuffer.length; i ++ ) {
             if (mapBuffer[i] == 0)
                 continue;
+
             var mesh = new THREE.Mesh( geometry, material );
-            // mesh.position.x = Math.random() * 1600 - 800;
+            
             let x = i % width;
             let y = i / width;
+
             mesh.position.x = x * groundScale - 128 * groundScale / 2;
             mesh.position.z = y * groundScale  - 128 * groundScale / 2;
             mesh.position.y = 0;
-            // mesh.position.z = Math.random() * 1600 - 800;
             mesh.scale.x = groundScale;
             mesh.scale.y = mapBuffer[i];
             mesh.scale.z = groundScale;
@@ -586,6 +595,10 @@ function updateCars(car){
     else
         car.rotationVelo = 0;
     // console.log(car.model.position)
+
+    car.box.matrix.makeRotationFromQuaternion(car.model.quaternion);
+    car.box.matrix.setPosition(car.model.position);
+    car.box.update();
 }
 
 
@@ -668,11 +681,14 @@ function update(time){
         if (collisionWarning && accel > 0.0)
             accel *=0.96;
 
-        if (accel > 20)
-            accel = 20;
+        if (accel > 40)
+            accel = 40;
 
-        if (accel < -10)
-            accel = -10;
+        if (accel < -20)
+            accel = -20;
+
+        mainBounding.matrix.makeRotationFromQuaternion(mainCarmodel.quaternion);
+        mainBounding.matrix.setPosition(mainCarmodel.position);        
     }
 }
 
