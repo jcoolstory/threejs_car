@@ -329,6 +329,7 @@ function init() {
     scene = new THREE.Scene();
     renderer = new THREE.WebGLRenderer({ antialias: false });
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.toneMapping = THREE.NoToneMapping;
 
     document.body.appendChild(renderer.domElement);
 
@@ -371,8 +372,12 @@ function carTraverse(child) {
 
                 bodyMaterial = child.material;
                 bodyMaterial.envMap = envCubemap;
-                bodyMaterial.reflectivity = 0.3;
-                bodyMaterial.emissive = new THREE.Color(0.1, 0.1, 0.1);
+                // bodyMaterial.reflectivity = 0.3;
+                // bodyMaterial.emissive = new THREE.Color(0.1,0.1,0.1);
+
+                bodyMaterial.reflectivity = 0.6;
+                bodyMaterial.shininess = 0.1;
+
                 vueApp.bodyColor = "#" + bodyMaterial.color.getHexString();
             }
             child.material = bodyMaterial;
@@ -387,7 +392,7 @@ function carTraverse(child) {
                 glassMaterial.color = new THREE.Color(0.3, 0.3, 0.3);
                 glassMaterial.envMap = envCubemap;
                 glassMaterial.reflectivity = 1;
-                // glassMaterial.opacity = 0.5; 
+                glassMaterial.opacity = 0.5;
             }
         }
     }
@@ -401,7 +406,7 @@ function createCar() {
     manager.onLoad = function (f) {
         loading = false;
     };
-    var path = "../../res/textures/cube/reflectIndoor/";
+    var path = "../../res/textures/cube/reflectGray/";
     var urls = [path + "px.jpg", path + "nx.jpg", path + "py.jpg", path + "ny.jpg", path + "pz.jpg", path + "nz.jpg"];
 
     envCubemap = new THREE.CubeTextureLoader().load(urls);
@@ -454,10 +459,10 @@ function createBackground() {
     /// showroomt을 white color 변경시 필요없음
     /// 
     // // create ground    
-    var groundTexture = new THREE.TextureLoader().load("../../res/textures/ground/TARMAC2.jpg");
-    groundTexture.wrapS = THREE.RepeatWrapping;
-    groundTexture.wrapT = THREE.RepeatWrapping;
-    groundTexture.repeat.set(4, 4);
+    // var groundTexture =  new THREE.TextureLoader().load("../../res/textures/ground/TARMAC2.jpg");
+    // groundTexture.wrapS = THREE.RepeatWrapping;
+    // groundTexture.wrapT = THREE.RepeatWrapping;
+    // groundTexture.repeat.set( 4, 4 );
     var groundGeo = new THREE.PlaneGeometry(4000, 4000, 1, 1);
     var groundMat = new THREE.MeshPhongMaterial({ shininess: 0.1 });
 
@@ -470,7 +475,7 @@ function createBackground() {
 
 function createLight() {
 
-    var hemisphereLight = new THREE.HemisphereLight(0x111111, 0xffffff);
+    var hemisphereLight = new THREE.HemisphereLight(0x111111, 0x666655);
     var ambientLight = new THREE.AmbientLight(0x333333, 0.6);
     var pointLight = new THREE.PointLight(0xeeeeee, 1);
     var directLight = new THREE.DirectionalLight(0xffffff, 1);
@@ -485,7 +490,6 @@ function createLight() {
     // camera.add(directLight);
     scene.add(hemisphereLight);
     scene.add(pointLight);
-    // camera.add(directLight);
     scene.add(ambientLight);
 }
 
@@ -594,6 +598,7 @@ function onWindowResize() {
     camera.updateProjectionMatrix();
     renderer.setSize(window.innerWidth, window.innerHeight);
 }
+console.log(renderer);
 
 var vueApp = new _vue2.default({
     el: "#wrap",
@@ -603,7 +608,10 @@ var vueApp = new _vue2.default({
             bodyColor: 0x4b0300,
             statusView: "Inner View",
             statusRotate: "Stop",
-            progressValue: 0
+            progressValue: 0,
+            renderer: renderer,
+            tonemappings: [{ text: "NoToneMapping", value: THREE.NoToneMapping }, { text: "LinearToneMapping", value: THREE.LinearToneMapping }, { text: "ReinhardToneMappiong", value: THREE.ReinhardToneMapping }, { text: "Uncarted2 ", value: THREE.Uncharted2ToneMapping }, { text: "Cineon", value: THREE.CineonToneMapping }],
+            selectmapping: undefined
         };
     },
     computed: {
@@ -612,6 +620,11 @@ var vueApp = new _vue2.default({
         }
     },
     methods: {
+        changedTonemapping1: function changedTonemapping1() {
+            renderer.toneMapping = this.selectmapping;
+            bodyMaterial.needsUpdate = true;
+            console.log("changedTonemapping", this.tonemappings[this.selectmapping]);
+        },
 
         // MATERIALS
         onProgress: function onProgress(xhr) {

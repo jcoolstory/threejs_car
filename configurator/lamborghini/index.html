@@ -28,7 +28,8 @@
 			<div id="group">
 				 <div style="height: 40px">Color <input type="color" v-on:change="colorChange(this)" v-model="bodyColor"/></div>
 				 <div><button v-on:click="toggleinner()"  id="toggleButton" > {{statusView}} </button></div> 
-				 <div><button v-on:click="toggleRotate()" id="toggleRotate" > {{statusRotate}} </button> </div>
+				 <div><button v-on:click="toggleRotate()" id="toggleRotate" > {{statusRotate}} </button> </div>				 
+				 <div>tonemap <select v-model="selectmapping" v-on:change="changedTonemapping1()"><option v-for="tone in tonemappings" v-bind:value="tone.value">{{tone.text}}<option></option></select></div>
 			</div>
 		</div>
 		</div>
